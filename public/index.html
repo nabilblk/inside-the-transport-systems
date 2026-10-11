@@ -1,0 +1,2617 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Inside the Transport Systems · 3D science explorer</title>
+<meta name="description" content="Explore the Year 8 science unit Transport systems in 3D: follow blood around the body, look inside blood and blood vessels, watch the heart pump, and trace water and sugar through a plant.">
+<meta name="theme-color" content="#EDF0F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141B35" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Inside the Transport Systems">
+<meta property="og:title" content="Inside the Transport Systems · 3D science explorer">
+<meta property="og:description" content="Explore the Year 8 science unit Transport systems in 3D: follow blood around the body, look inside blood and blood vessels, watch the heart pump, and trace water and sugar through a plant.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gabarito:wght@600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,500;6..12,600;6..12,700;6..12,800&display=swap">
+<style>
+/* Page base: the explorer was first built as a hosted page that came with these defaults. */
+:root{color-scheme:light}
+body{margin:0;font:14px system-ui}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<style>
+/* Layout: one full-bleed 3D stage. A slim chapter bar on top, one story card that always says what to look at
+   (left column on wide screens, bottom sheet on phones). The 3D view re-centres itself in the space the card leaves free. */
+:root{
+  --bg:#EDF0F7; --bg-deep:#D6DCEA; --ink:#141D36; --ink-2:#47526F; --ink-3:#737D9B;
+  --panel:rgba(255,255,255,.90); --panel-solid:#FFFFFF; --panel-edge:rgba(20,29,54,.11); --chip:#E6EAF4; --chip-ink:#2B3555;
+  --oxy:#DD4239; --deoxy:#4643CC; --plant:#0B8576; --sugar:#B97F00; --water:#1478C9; --accent:#4340C4; --accent-ink:#FFFFFF;
+  --good:#0B8576; --good-bg:#DDF3EF; --bad:#BF372D; --bad-bg:#FCE5E2;
+  --f-display:"Gabarito","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-text:"Nunito Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --shadow:0 18px 40px -22px rgba(20,29,54,.5),0 2px 8px rgba(20,29,54,.08);
+  --r-card:20px; --r-pill:999px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141B35; --bg-deep:#060A16; --ink:#EEF1FB; --ink-2:#B6BED8; --ink-3:#8790AE;
+    --panel:rgba(20,27,49,.88); --panel-solid:#18203B; --panel-edge:rgba(255,255,255,.11); --chip:#262F55; --chip-ink:#DCE2F5;
+    --oxy:#FF6D63; --deoxy:#9592FF; --plant:#32C7B1; --sugar:#FFC445; --water:#5BB8FF; --accent:#8F8CFF; --accent-ink:#0E1430;
+    --good:#32C7B1; --good-bg:#123A3A; --bad:#FF7D72; --bad-bg:#46222A;
+    --shadow:0 20px 44px -20px rgba(0,0,0,.75),0 2px 8px rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141B35; --bg-deep:#060A16; --ink:#EEF1FB; --ink-2:#B6BED8; --ink-3:#8790AE;
+  --panel:rgba(20,27,49,.88); --panel-solid:#18203B; --panel-edge:rgba(255,255,255,.11); --chip:#262F55; --chip-ink:#DCE2F5;
+  --oxy:#FF6D63; --deoxy:#9592FF; --plant:#32C7B1; --sugar:#FFC445; --water:#5BB8FF; --accent:#8F8CFF; --accent-ink:#0E1430;
+  --good:#32C7B1; --good-bg:#123A3A; --bad:#FF7D72; --bad-bg:#46222A;
+  --shadow:0 20px 44px -20px rgba(0,0,0,.75),0 2px 8px rgba(0,0,0,.35); color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-text);overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#app{position:fixed;inset:0;overflow:hidden;background:radial-gradient(115% 90% at 66% 36%,var(--bg) 0%,var(--bg-deep) 100%)}
+#stage{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;outline:none}
+#stage.grabbing{cursor:grabbing}
+#stage.pickable{cursor:pointer}
+#labels{position:absolute;inset:0;pointer-events:none;z-index:2}
+#tint{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0}
+
+/* chapter bar */
+#bar{position:absolute;left:0;right:0;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 0;pointer-events:none}
+#bar>*{pointer-events:auto}
+.brand{display:flex;flex-direction:column;flex:none;line-height:1}
+.brand b{font:800 18px/1 var(--f-display);letter-spacing:-.01em}
+.brand span{font:700 11px/1 var(--f-text);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+#chapters{display:flex;gap:4px;padding:5px;min-width:0;overflow-x:auto;scrollbar-width:none;background:var(--panel);border:1px solid var(--panel-edge);border-radius:var(--r-pill);box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#chapters::-webkit-scrollbar{display:none}
+#chapters button{flex:none;display:flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--ink-2);font:700 13.5px/1 var(--f-text);padding:7px 13px 8px 7px;border-radius:var(--r-pill);cursor:pointer;transition:background .25s,color .25s}
+#chapters button:hover{background:var(--chip)}
+#chapters button i{font:800 11.5px/1 var(--f-display);font-style:normal;width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:var(--chip);color:var(--chip-ink)}
+#chapters button[aria-current="true"]{background:var(--ink);color:var(--panel-solid)}
+#chapters button[aria-current="true"] i{background:var(--panel-solid);color:var(--ink)}
+#chapters button.done i{background:var(--good);color:var(--panel-solid)}
+.tools{margin-left:auto;display:flex;gap:8px;flex:none}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--panel-edge);background:var(--panel);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.icon-btn svg{width:19px;height:19px}
+
+/* colour key */
+#legend{position:absolute;right:16px;top:calc(68px + env(safe-area-inset-top,0px));z-index:4;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
+.key{display:flex;align-items:center;gap:8px;font:700 12.5px/1 var(--f-text);color:var(--ink-2);background:var(--panel);padding:7px 12px 7px 9px;border-radius:var(--r-pill);border:1px solid var(--panel-edge);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.key i{width:12px;height:12px;border-radius:50%;flex:none}
+.key.note{font-weight:600;font-size:11.5px;color:var(--ink-3)}
+
+/* story card */
+#card{position:absolute;z-index:6;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(410px,calc(100% - 32px));max-height:calc(100% - 96px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:18px 20px 16px;background:var(--panel);border:1px solid var(--panel-edge);border-radius:var(--r-card);box-shadow:var(--shadow);backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#kicker{font:700 11.5px/1.2 var(--f-text);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+#dots{display:flex;gap:5px;flex:none}
+#dots button{width:9px;height:9px;padding:0;border:0;border-radius:5px;background:var(--chip);cursor:pointer;transition:width .3s,background .3s}
+#dots button.on{width:22px;background:var(--accent)}
+#dots button.seen{background:var(--ink-3)}
+#stepTitle{margin:0;font:800 24px/1.1 var(--f-display);letter-spacing:-.015em;text-wrap:balance}
+#stepText{margin:0;font:500 15.5px/1.5 var(--f-text);color:var(--ink-2);max-width:62ch;text-wrap:pretty}
+#stepText b{color:var(--ink);font-weight:800}
+.t-oxy{color:var(--oxy);font-weight:800}.t-deoxy{color:var(--deoxy);font-weight:800}.t-plant{color:var(--plant);font-weight:800}
+.t-water{color:var(--water);font-weight:800}.t-sugar{color:var(--sugar);font-weight:800}
+#stepCtl{display:flex;flex-direction:column;gap:10px}
+#stepCtl:empty{display:none}
+.card-nav{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 18px;border-radius:var(--r-pill);border:1px solid var(--panel-edge);background:var(--chip);color:var(--ink);font:800 14.5px/1 var(--f-text);cursor:pointer;transition:transform .15s,background .2s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent;flex:1}
+.btn.small{min-height:36px;padding:0 14px;font-size:13.5px}
+.btn[disabled]{opacity:.4;cursor:default}
+.btn svg{width:16px;height:16px}
+.mini{font:600 12.5px/1.45 var(--f-text);color:var(--ink-3);margin:0}
+
+/* step controls */
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.slider{display:flex;flex-direction:column;gap:6px}
+.slider label{display:flex;justify-content:space-between;font:700 13px/1 var(--f-text);color:var(--ink-2)}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0;cursor:pointer}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.readout div{background:var(--chip);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.readout b{font:800 26px/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.readout span{font:600 12px/1.25 var(--f-text);color:var(--ink-2)}
+.route{display:flex;flex-wrap:wrap;gap:5px}
+.route span{font:700 12px/1 var(--f-text);padding:6px 9px 7px;border-radius:var(--r-pill);background:var(--chip);color:var(--ink-3);transition:background .35s,color .35s,box-shadow .35s}
+.route span.done{color:var(--ink-2)}
+.route span.now{color:#fff;background:var(--c);box-shadow:0 4px 12px -4px var(--c)}
+.route span.deoxy{--c:var(--deoxy)}.route span.oxy{--c:var(--oxy)}
+.route span.mix{--c:var(--accent)}
+.narr{font:700 14.5px/1.4 var(--f-text);color:var(--ink);min-height:2.8em;margin:0}
+.narr em{font-style:normal;color:var(--ink-3);font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:2px}
+.phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.phases div{position:relative;overflow:hidden;border-radius:10px;padding:8px 9px 11px;background:var(--chip);font:700 12.5px/1.2 var(--f-text);color:var(--ink-3);transition:background .2s,color .2s;min-width:0}
+.phases div b{display:block;font:800 14px/1.1 var(--f-display);color:var(--ink-2);margin-bottom:2px}
+.phases div.on{background:var(--ink);color:var(--panel-solid)}
+.phases div.on b{color:var(--panel-solid)}
+.phases div i{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--accent)}
+.sound{display:flex;gap:8px;align-items:center;font:800 15px/1 var(--f-display);color:var(--ink-3);min-height:20px}
+.sound span{opacity:.25;transition:opacity .2s,transform .2s;color:var(--accent)}
+.sound span.on{opacity:1;transform:scale(1.15)}
+.seg{display:inline-flex;background:var(--chip);border-radius:var(--r-pill);padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:8px 14px;border-radius:var(--r-pill);font:800 13px/1 var(--f-text);color:var(--ink-2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel-solid);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.info{display:flex;gap:12px;align-items:flex-start;background:var(--chip);border-radius:14px;padding:11px 13px}
+.info .sw{width:30px;height:30px;border-radius:50%;flex:none;margin-top:2px}
+.info b{display:block;font:800 15px/1.2 var(--f-display);margin-bottom:2px}
+.info p{margin:0;font:600 13.5px/1.42 var(--f-text);color:var(--ink-2)}
+.ladder{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.ladder button{border:1px solid var(--panel-edge);background:var(--chip);border-radius:12px;padding:8px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font:800 12px/1.1 var(--f-text);color:var(--ink-2);min-width:0}
+.ladder button small{font:600 10.5px/1.15 var(--f-text);color:var(--ink-3);text-align:center}
+.ladder button[aria-pressed="true"]{background:var(--plant);color:#fff;border-color:transparent}
+.ladder button[aria-pressed="true"] small{color:#E9FFFA}
+.toggles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.tog{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 3px 8px;border-radius:14px;border:1px solid var(--panel-edge);background:var(--chip);color:var(--ink-2);font:800 12px/1 var(--f-text);cursor:pointer;transition:background .25s,color .25s}
+.tog svg{width:22px;height:22px}
+.tog[aria-pressed="true"]{background:var(--ink);color:var(--panel-solid)}
+.meter{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;background:var(--chip);border-radius:14px;padding:11px 13px}
+.meter b{font:800 28px/1 var(--f-display);font-variant-numeric:tabular-nums;grid-row:span 2}
+.meter span{font:700 12px/1.2 var(--f-text);color:var(--ink-2)}
+.meter .bar{height:10px;border-radius:5px;background:var(--panel-solid);overflow:hidden}
+.meter .bar i{display:block;height:100%;width:30%;background:var(--water);border-radius:5px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.stoma{display:flex;align-items:center;gap:10px;font:700 12.5px/1.3 var(--f-text);color:var(--ink-2)}
+.stoma svg{width:46px;height:34px;flex:none}
+.check{border-radius:14px;padding:12px 14px;background:var(--chip);font:700 14px/1.45 var(--f-text);color:var(--ink)}
+.check.good{background:var(--good-bg)}.check.bad{background:var(--bad-bg)}
+.check .ck{display:block;font:800 15px/1.2 var(--f-display);margin-bottom:3px}
+.check.good .ck{color:var(--good)}.check.bad .ck{color:var(--bad)}
+.check b{font-weight:800}
+.tap{display:inline-flex;align-items:center;gap:8px;font:800 13px/1 var(--f-text);color:var(--accent)}
+.tap i{width:10px;height:10px;border-radius:50%;background:var(--accent);animation:ping 1.4s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 12px transparent}}
+
+/* labels pinned to the 3D model */
+.lab{position:absolute;width:0;height:0;opacity:0;transition:opacity .45s ease}
+.lab.on{opacity:1}
+.lab .dot{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 2.5px var(--panel-solid)}
+.lab .ln{position:absolute;left:0;top:-.75px;height:1.5px;background:var(--ink);opacity:.5;transform-origin:0 50%}
+.lab .pill{position:absolute;left:0;top:0;width:max-content;max-width:290px;white-space:normal;font:800 13.5px/1.15 var(--f-text);color:var(--ink);background:var(--panel-solid);border:1px solid var(--panel-edge);padding:6px 11px 7px;border-radius:11px;box-shadow:var(--shadow)}
+.lab .pill small{display:block;font:600 11.5px/1.25 var(--f-text);color:var(--ink-2);margin-top:2px}
+.lab.oxy .dot{background:var(--oxy)}.lab.deoxy .dot{background:var(--deoxy)}.lab.plant .dot{background:var(--plant)}
+.lab.water .dot{background:var(--water)}.lab.sugar .dot{background:var(--sugar)}.lab.warn .dot{background:var(--accent)}.lab.grey .dot{background:#7D86A6}
+.lab.oxy .pill{border-left:3px solid var(--oxy)}.lab.deoxy .pill{border-left:3px solid var(--deoxy)}
+.lab.side .pill{font:900 16px/1 var(--f-display);letter-spacing:.07em;text-transform:uppercase;background:transparent;border:0;box-shadow:none;color:var(--ink-2);padding:0}
+.lab.side .pill small{font:700 12px/1.2 var(--f-text);letter-spacing:0;text-transform:none;color:var(--ink-3);margin-top:4px}
+.lab.nodot .dot,.lab.nodot .ln{display:none}
+.lab.pop .pill{font:900 22px/1 var(--f-display);color:var(--accent);background:transparent;border:0;box-shadow:none;letter-spacing:.02em}
+.lab.follow .pill{background:var(--ink);color:var(--panel-solid);border:0}
+
+#hint{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:3;font:700 12.5px/1 var(--f-text);color:var(--ink-3);background:var(--panel);border:1px solid var(--panel-edge);padding:9px 13px;border-radius:var(--r-pill);transition:opacity .6s;pointer-events:none}
+#hint.gone{opacity:0}
+#flash{position:absolute;inset:0;z-index:4;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .3s ease}
+#flash.on{opacity:1}
+#loading{position:absolute;inset:0;z-index:9;display:grid;place-items:center;background:var(--bg);transition:opacity .6s}
+#loading.gone{opacity:0;pointer-events:none}
+#loading div{display:flex;flex-direction:column;align-items:center;gap:14px;font:700 15px/1.4 var(--f-text);color:var(--ink-2);text-align:center;padding:0 24px}
+#loading i{width:44px;height:44px;border-radius:50%;border:4px solid var(--chip);border-top-color:var(--oxy);border-right-color:var(--deoxy);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:899px){
+  #card{left:16px;right:16px;width:auto;max-height:46%;padding:14px 16px 12px;gap:9px}
+  #stepTitle{font-size:20px}
+  #stepText{font-size:14.5px;line-height:1.45}
+  .brand span{display:none}
+  #legend{top:calc(62px + env(safe-area-inset-top,0px));left:16px;right:16px;flex-direction:row;justify-content:flex-end;flex-wrap:wrap}
+  .key{font-size:11.5px;padding:6px 10px 6px 8px}
+  .key.note{display:none}
+  #hint{display:none}
+  .lab .pill{font-size:12px;padding:5px 9px 6px;max-width:190px}
+  .lab .pill small{font-size:10.5px}
+}
+@media (max-width:560px){
+  .brand{display:none}
+  #chapters button{padding:7px 9px 8px 7px}
+  #chapters button span{display:none}
+  #chapters button[aria-current="true"] span{display:inline}
+  .readout b{font-size:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  .tap i{animation:none}
+  #dots button,.route span,#flash{transition:none}
+}
+</style>
+</head>
+<body>
+<noscript><div style="position:fixed;left:0;right:0;bottom:28px;z-index:20;text-align:center;font:600 15px/1.4 system-ui;color:var(--ink,#141D36)">This explorer needs JavaScript and WebGL. Please turn JavaScript on and reload.</div></noscript>
+<div id="app">
+  <canvas id="stage" aria-label="Interactive 3D model. Drag to turn it, scroll or pinch to zoom." tabindex="0"></canvas>
+  <div id="labels" aria-hidden="true"></div>
+  <div id="tint"></div>
+  <header id="bar">
+    <div class="brand"><b>Transport systems</b><span>Year 8 science · 3D</span></div>
+    <nav id="chapters" aria-label="Chapters"></nav>
+    <div class="tools">
+      <button class="icon-btn" id="resetView" title="Reset the view" aria-label="Reset the view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+    </div>
+  </header>
+  <aside id="legend" aria-label="Colour key"></aside>
+  <section id="card" aria-live="polite">
+    <div class="card-head"><span id="kicker"></span><div id="dots" role="tablist" aria-label="Steps"></div></div>
+    <h2 id="stepTitle"></h2>
+    <p id="stepText"></p>
+    <div id="stepCtl"></div>
+    <div class="card-nav">
+      <button class="btn" id="back" aria-label="Previous step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Back</button>
+      <button class="btn primary" id="next">Next<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+  </section>
+  <div id="hint">Drag to turn · scroll to zoom</div>
+  <div id="flash"></div>
+  <div id="loading"><div><i></i><span id="loadMsg">Building the 3D models…</span></div></div>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
+<script type="module">
+// ============================================================== core: renderer, camera, helpers
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const TAU = Math.PI * 2;
+const V3 = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
+const clamp = (x, a, b) => (x < a ? a : x > b ? b : x);
+const lerp = (a, b, t) => a + (b - a) * t;
+const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const easeIO = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+
+// The 3D palette matches the workbook: coral = oxygen-rich, indigo = oxygen-poor, teal = plant, sky blue = water, mango = sugar.
+const C = {
+  oxy: '#EE5A52', oxyDeep: '#B9312B', deoxy: '#5552DA', deoxyDeep: '#2F2C9B', oxyT: '#F7B8B2', deoxyT: '#C4C2F7',
+  muscle: '#CF5B53', muscleCut: '#F0A49B', valve: '#FFF1E6',
+  coat: '#EFE6EA', lining: '#FFE2DA', elastic: '#FFF4D6', tissue: '#F2C2B7', tissueDeep: '#D99A8E', nucleus: '#8B5CC2',
+  plasma: '#F6C44B', wbc: '#ECEAFF', platelet: '#F5A93A',
+  leaf: '#16A088', leafDeep: '#0B6F60', stem: '#2AA68E', root: '#D9C49C', soil: '#8D6B49', soilDeep: '#5C452F',
+  xylem: '#2E9BF0', phloem: '#F5A514', water: '#2E9BF0', vapour: '#CFEAFF', sugar: '#FFB81F', chloro: '#2DB34A',
+};
+const col = h => new THREE.Color(h);
+
+// ---------------------------------------------------------------- renderer
+const canvas = document.getElementById('stage');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+} catch (e) {
+  document.getElementById('loadMsg').textContent = 'This device could not start 3D graphics (WebGL). Try another browser, or turn on hardware acceleration.';
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.02;
+renderer.localClippingEnabled = true;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(36, 1, 0.05, 900);
+camera.position.set(0, 2, 30);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.085; controls.enablePan = false;
+controls.rotateSpeed = 0.65; controls.zoomSpeed = 0.8;
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.7;
+const hemi = new THREE.HemisphereLight('#FFFFFF', '#AEB8D4', 0.85); scene.add(hemi);
+const keyLight = new THREE.DirectionalLight('#FFFFFF', 2.1); keyLight.position.set(7, 11, 10); scene.add(keyLight);
+const rimLight = new THREE.DirectionalLight('#CFDAFF', 1.1); rimLight.position.set(-9, 5, -10); scene.add(rimLight);
+
+const labelRenderer = new CSS2DRenderer({ element: document.getElementById('labels') });
+// screen tint for the experiment (dark, hot). Faded by the render loop, so it never sticks half-way on a slow device.
+const TINT = { el: document.getElementById('tint'), k: 0, target: 0, bg: 'transparent',
+  set(bg, on) { if (bg !== this.bg) { this.bg = bg; if (on) this.el.style.background = bg; } this.target = on ? 1 : 0; },
+  update(dt) { this.k += (this.target - this.k) * (1 - Math.exp(-dt * 5)); if (this.k < 0.003 && this.target === 0) this.k = 0; this.el.style.opacity = this.k.toFixed(3); } };
+
+// ---------------------------------------------------------------- framing: keep the subject centred in the free space
+const cardEl = document.getElementById('card'), barEl = document.getElementById('bar');
+const VIEW = { w: 1, h: 1, freeW: 1, freeH: 1 };
+function layout() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false); labelRenderer.setSize(w, h);
+  camera.aspect = w / h;
+  const c = cardEl.getBoundingClientRect(), b = barEl.getBoundingClientRect();
+  const wide = w >= 900, lg = document.getElementById('legend').getBoundingClientRect();
+  let x0 = 0, x1 = w, y0 = (wide || !lg.height ? b.bottom : Math.max(b.bottom, lg.bottom)) + 6, y1 = h;
+  if (wide) x0 = c.right + 8; else y1 = c.top - 6;
+  VIEW.w = w; VIEW.h = h; VIEW.freeW = Math.max(120, x1 - x0); VIEW.freeH = Math.max(120, y1 - y0);
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  camera.setViewOffset(w, h, w / 2 - cx, h / 2 - cy, w, h);
+  camera.updateProjectionMatrix();
+}
+// distance at which a box of world size (fw, fh) fills the free space with a small margin
+function fitDistance(fw, fh, margin = 1.12) {
+  const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const fracH = VIEW.freeH / VIEW.h, fracW = VIEW.freeW / VIEW.w;
+  const dh = (fh * margin) / (2 * t * fracH);
+  const dw = (fw * margin) / (2 * t * camera.aspect * fracW);
+  return Math.max(dh, dw);
+}
+
+// ---------------------------------------------------------------- tweens and camera flights
+const tweens = new Set();
+function tween(dur, fn, ease = easeIO) {
+  return new Promise(res => { tweens.add({ t: 0, dur: Math.max(1e-4, REDUCED ? dur * 0.4 : dur), fn, ease, res }); });
+}
+function runTweens(dt) {
+  for (const tw of tweens) {
+    tw.t += dt; const k = Math.min(1, tw.t / tw.dur); tw.fn(tw.ease(k));
+    if (k >= 1) { tweens.delete(tw); tw.res(); }
+  }
+}
+const CAM = { token: 0, busy: false, follow: null, home: null };
+const _q0 = new THREE.Quaternion(), _q1 = new THREE.Quaternion(), _qk = new THREE.Quaternion(), _fwd = V3(0, 0, 1);
+function frameSpec(spec) {
+  const t = V3(...spec.t), dir = V3(...(spec.dir || [0, 0.12, 1])).normalize();
+  const d = fitDistance(spec.w, spec.h, spec.margin || 1.12);
+  return { target: t, pos: t.clone().addScaledVector(dir, d), dist: d };
+}
+function flyTo(spec, dur = 1.35, instant = false) {
+  const tok = ++CAM.token; CAM.follow = null; CAM.home = spec;
+  const { target, pos, dist } = frameSpec(spec);
+  controls.minDistance = dist * (spec.minK || 0.32); controls.maxDistance = dist * (spec.maxK || 2.3);
+  if (instant) { camera.position.copy(pos); controls.target.copy(target); controls.update(); return Promise.resolve(); }
+  const t0 = controls.target.clone(), p0 = camera.position.clone();
+  const d0 = p0.distanceTo(t0), d1 = pos.distanceTo(target);
+  const dir0 = p0.clone().sub(t0).normalize(), dir1 = pos.clone().sub(target).normalize();
+  _q0.setFromUnitVectors(_fwd, dir0); _q1.setFromUnitVectors(_fwd, dir1);
+  CAM.busy = true;
+  return tween(dur, k => {
+    if (tok !== CAM.token) return;
+    controls.target.lerpVectors(t0, target, k);
+    _qk.slerpQuaternions(_q0, _q1, k);
+    const dd = lerp(d0, d1, k) * (1 + 0.18 * Math.sin(Math.PI * k) * (d0 > 0 ? 1 : 0));
+    camera.position.copy(_fwd).applyQuaternion(_qk).multiplyScalar(dd).add(controls.target);
+  }).then(() => { if (tok === CAM.token) CAM.busy = false; });
+}
+
+// ---------------------------------------------------------------- materials
+function tissue(color, o = {}) {
+  const c = col(color);
+  return new THREE.MeshPhysicalMaterial(Object.assign({
+    color: c, roughness: 0.46, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.32,
+    sheen: 0.55, sheenRoughness: 0.5, sheenColor: c.clone().lerp(col('#ffffff'), 0.55),
+  }, o));
+}
+// x-ray glass: transparent in the middle, bright at grazing angles, so what flows inside stays readable
+const GLASS_VS = `
+  varying vec3 vN; varying vec3 vV;
+  #ifdef BEAT
+  uniform float uA; uniform float uV;
+  #endif
+  void main(){
+    vec3 p = position;
+    #ifdef BEAT
+    { float am = smoothstep(-3.0, 3.0, p.y); vec2 ac = vec2(sign(p.x) * 23.0, 15.0); vec2 vc = vec2(0.0, -22.0);
+      vec2 pa = ac + (p.xy - ac) * (1.0 - 0.10 * uA); vec2 pv = vc + (p.xy - vc) * (1.0 - 0.075 * uV); p.xy = mix(pv, pa, am); }
+    #endif
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz);
+    gl_Position = projectionMatrix * mv;
+  }`;
+const GLASS_FS = `
+  uniform vec3 uColor; uniform float uOpacity; uniform float uPower; uniform float uBase; uniform float uGlow;
+  varying vec3 vN; varying vec3 vV;
+  void main(){
+    float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), uPower);
+    float a = uOpacity * (uBase + (1.0 - uBase) * f) + uGlow * 0.35 * f;
+    vec3 c = uColor * (0.78 + 0.5 * f) + vec3(uGlow) * 0.55 * f;
+    gl_FragColor = vec4(c, clamp(a, 0.0, 1.0));
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }`;
+function glass(color, o = {}) {
+  const m = new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: col(color) }, uOpacity: { value: o.opacity ?? 0.55 }, uPower: { value: o.power ?? 2.0 }, uBase: { value: o.base ?? 0.12 }, uGlow: { value: 0 },
+                uA: o.beat ? o.beat.uA : { value: 0 }, uV: o.beat ? o.beat.uV : { value: 0 } },
+    vertexShader: GLASS_VS, fragmentShader: GLASS_FS, transparent: true, depthWrite: false, side: o.side ?? THREE.DoubleSide,
+    defines: o.beat ? { BEAT: '' } : {},
+  });
+  m.isGlass = true; return m;
+}
+// heartbeat squeeze, injected into standard materials (same maths as GLASS_VS so walls and glass move together)
+function beatify(mat, beat) {
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.uA = beat.uA; sh.uniforms.uV = beat.uV;
+    sh.vertexShader = 'uniform float uA; uniform float uV;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      { float am = smoothstep(-3.0, 3.0, transformed.y); vec2 ac = vec2(sign(transformed.x) * 23.0, 15.0); vec2 vc = vec2(0.0, -22.0);
+        vec2 pa = ac + (transformed.xy - ac) * (1.0 - 0.10 * uA); vec2 pv = vc + (transformed.xy - vc) * (1.0 - 0.075 * uV);
+        transformed.xy = mix(pv, pa, am); }`);
+  };
+  mat.customProgramCacheKey = () => 'beat';
+  return mat;
+}
+function squeezePoint(p, uA, uV) {   // CPU twin of the shader above, for particles inside the chambers
+  const am = sstep(-3, 3, p.y);
+  const acx = Math.sign(p.x) * 23, acy = 15, vcx = 0, vcy = -22;
+  const pax = acx + (p.x - acx) * (1 - 0.10 * uA), pay = acy + (p.y - acy) * (1 - 0.10 * uA);
+  const pvx = vcx + (p.x - vcx) * (1 - 0.075 * uV), pvy = vcy + (p.y - vcy) * (1 - 0.075 * uV);
+  p.x = lerp(pvx, pax, am); p.y = lerp(pvy, pay, am);
+}
+const invisible = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false });
+function hull(geo, key, parent, pos) { const m = new THREE.Mesh(geo, invisible); m.userData.pick = key; if (pos) m.position.copy(pos); parent.add(m); return m; }
+
+// highlight registry: materials glow gently when their key is in focus
+class Glow {
+  constructor() { this.map = new Map(); this.focus = new Set(); }
+  add(key, ...mats) { if (!this.map.has(key)) this.map.set(key, { mats: [], k: 0 }); this.map.get(key).mats.push(...mats); }
+  set(keys = []) { this.focus = new Set(keys); }
+  update(dt, t) {
+    for (const [key, e] of this.map) {
+      const target = this.focus.has(key) ? 1 : 0;
+      e.k += (target - e.k) * (1 - Math.exp(-dt * 6));
+      const pulse = e.k * (0.55 + 0.45 * Math.sin(t * 4.2));
+      for (const m of e.mats) {
+        if (m.isGlass) m.uniforms.uGlow.value = pulse * 0.9;
+        else if (m.emissive) { m.emissive.setRGB(1, 1, 1); m.emissiveIntensity = pulse * 0.32; }
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------- labels pinned to the model
+const LABELS = [];
+function label(text, o = {}) {
+  const el = document.createElement('div');
+  el.className = 'lab ' + (o.tone || '');
+  const dx = o.dx ?? 0, dy = o.dy ?? -40;
+  el.innerHTML = `<i class="dot"></i><i class="ln"></i><span class="pill">${text}${o.sub ? `<small>${o.sub}</small>` : ''}</span>`;
+  const obj = new CSS2DObject(el); obj.visible = false;
+  Object.assign(obj.userData, { el, dx, dy, ox: dx, oy: dy, pill: el.querySelector('.pill'), ln: el.querySelector('.ln'), fresh: true, free: !o.fixed });
+  placeLabel(obj, dx, dy);
+  if (o.pos) obj.position.copy(o.pos);
+  LABELS.push(obj);
+  return obj;
+}
+function placeLabel(obj, x, y) {
+  const u = obj.userData, L = Math.hypot(x, y);
+  u.pill.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-50%)`;
+  u.ln.style.width = `${Math.max(0, L).toFixed(1)}px`; u.ln.style.transform = `rotate(${Math.atan2(y, x).toFixed(4)}rad)`;
+  u.ln.style.display = L > 14 ? '' : 'none';
+}
+function setLabelText(obj, text, sub) { const p = obj.userData.pill; p.innerHTML = text + (sub ? `<small>${sub}</small>` : ''); obj.userData.pw = 0; }
+
+// Keep every visible label on screen and clear of the card, the bars and each other. Runs after each render.
+const _lv = new THREE.Vector3();
+function layoutLabels(blockers) {
+  const W = VIEW.w, H = VIEW.h, M = 8, placed = blockers.slice();
+  for (const obj of LABELS) {
+    const u = obj.userData;
+    if (!u.free || u.el.style.display === 'none' || !u.el.classList.contains('on')) { u.fresh = true; continue; }
+    if (!u.pw) { u.pw = u.pill.offsetWidth; u.ph = u.pill.offsetHeight; }
+    obj.getWorldPosition(_lv).project(camera);
+    const ax = (_lv.x * 0.5 + 0.5) * W, ay = (-_lv.y * 0.5 + 0.5) * H, hw = u.pw / 2 + 3, hh = u.ph / 2 + 3;
+    let cx = ax + u.dx, cy = ay + u.dy;
+    for (let it = 0; it < 6; it++) {
+      cx = clamp(cx, hw + M, W - hw - M); cy = clamp(cy, hh + M, H - hh - M);
+      let moved = false;
+      for (const r of placed) {
+        const ox = Math.min(cx + hw, r.x1) - Math.max(cx - hw, r.x0), oy = Math.min(cy + hh, r.y1) - Math.max(cy - hh, r.y0);
+        if (ox <= 0 || oy <= 0) continue;
+        moved = true;
+        const rcx = (r.x0 + r.x1) / 2, rcy = (r.y0 + r.y1) / 2;
+        if (oy <= ox || W < 700) cy += cy < rcy ? -oy : oy; else cx += cx < rcx ? -ox : ox;   // narrow screens: stack, there is no room sideways
+      }
+      if (!moved) break;
+    }
+    cx = clamp(cx, hw + M, W - hw - M); cy = clamp(cy, hh + M, H - hh - M);
+    const tx = cx - ax, ty = cy - ay;
+    if (u.fresh) { u.ox = tx; u.oy = ty; u.fresh = false; } else { u.ox += (tx - u.ox) * 0.4; u.oy += (ty - u.oy) * 0.4; }
+    placeLabel(obj, u.ox, u.oy);
+    placed.push({ x0: ax + u.ox - hw, x1: ax + u.ox + hw, y0: ay + u.oy - hh, y1: ay + u.oy + hh });
+  }
+}
+
+// ---------------------------------------------------------------- paths and flowing particles
+class Path {
+  constructor(pts, o = {}) {
+    const v = pts.map(p => (p.isVector3 ? p.clone() : V3(p[0], p[1], p[2] ?? 0)));
+    this.curve = new THREE.CatmullRomCurve3(v, false, 'centripetal');
+    this.len = Math.max(1e-4, this.curve.getLength()); const n = this.n = o.n || Math.max(24, Math.min(240, Math.round(this.len * (o.density || 6))));
+    const fr = this.curve.computeFrenetFrames(n, false);
+    this.P = []; for (let i = 0; i <= n; i++) this.P.push(this.curve.getPointAt(i / n));
+    this.T = fr.tangents; this.N = fr.normals; this.B = fr.binormals;
+    if (o.planeN) { // keep the 'normal' in a chosen plane (useful for flat diagrams)
+      const up = V3(...o.planeN);
+      for (let i = 0; i <= n; i++) { this.B[i].copy(up); this.N[i].crossVectors(this.B[i], this.T[i]).normalize(); this.B[i].crossVectors(this.T[i], this.N[i]).normalize(); }
+    }
+  }
+  at(t, out) { const f = clamp(t, 0, 1) * this.n, i = Math.min(Math.floor(f), this.n - 1), k = f - i; return out.lerpVectors(this.P[i], this.P[i + 1], k); }
+  frame(t, T, N, B) {
+    const f = clamp(t, 0, 1) * this.n, i = Math.min(Math.floor(f), this.n - 1), k = f - i;
+    T.lerpVectors(this.T[i], this.T[i + 1], k).normalize(); N.lerpVectors(this.N[i], this.N[i + 1], k).normalize(); B.lerpVectors(this.B[i], this.B[i + 1], k).normalize();
+  }
+}
+const _P = V3(), _T = V3(), _N = V3(), _B = V3(), _Q = new THREE.Quaternion(), _S = V3(), _M = new THREE.Matrix4(), _C = new THREE.Color();
+class Flow {
+  // segs: [{paths:[Path], rn, rb}]; hooks decide speed, routing, colour, size and any final position tweak
+  constructor(o) {
+    this.mesh = new THREE.InstancedMesh(o.geometry, o.material, o.count);
+    this.mesh.frustumCulled = false; this.mesh.castShadow = false;
+    if (o.pick) this.mesh.userData.pick = o.pick;
+    o.parent.add(this.mesh);
+    Object.assign(this, { segs: o.segs, next: o.next, speed: o.speed, color: o.color, scale: o.scale, pos: o.pos, size: o.size ?? 1, tumble: o.tumble ?? 1 });
+    const R = this.R = rng(o.seed || 1);
+    this.cells = Array.from({ length: o.count }, (_, i) => ({
+      i, seg: 0, br: 0, t: 0, ox: 0, oy: 0, ax: V3(R() - 0.5, R() - 0.5, R() - 0.5).normalize(), rot: R() * TAU,
+      spin: (R() - 0.5) * 2.4, j: 0.8 + R() * 0.4, slot: 0.12 + 0.82 * R(), k: R(), d: {},
+    }));
+    for (const c of this.cells) { this.lateral(c); o.init(c, R); }
+    for (let i = 0; i < o.count; i++) this.mesh.setColorAt(i, _C.set('#ffffff'));
+    this.update(0, 0);
+  }
+  lateral(c) { const a = TAU * this.R(), d = Math.sqrt(this.R()); c.ox = Math.cos(a) * d; c.oy = Math.sin(a) * d; }
+  update(dt, time) {
+    for (const c of this.cells) {
+      let s = this.segs[c.seg], path = s.paths[c.br];
+      const v = this.speed(c, s, time);
+      c.t += (v * dt) / path.len;
+      let guard = 0;
+      while (c.t >= 1 && guard++ < 4) { c.t -= 1; this.next(c, this.R); if (!c.keepLateral) this.lateral(c); s = this.segs[c.seg]; path = s.paths[c.br]; if (s.clampT) c.t = Math.min(c.t, 0.02); }
+      path.at(c.t, _P); path.frame(c.t, _T, _N, _B);
+      _P.addScaledVector(_N, c.ox * (s.rn ?? 0)).addScaledVector(_B, c.oy * (s.rb ?? s.rn ?? 0));
+      if (this.pos) this.pos(c, s, _P, time);
+      c.rot += c.spin * dt * this.tumble;
+      _Q.setFromAxisAngle(c.ax, c.rot);
+      const sc = this.size * (this.scale ? this.scale(c, s, time) : 1);
+      _S.set(sc, sc, sc); _M.compose(_P, _Q, _S); this.mesh.setMatrixAt(c.i, _M);
+      if (this.color) { this.color(c, s, _C, time); this.mesh.setColorAt(c.i, _C); }
+    }
+    this.mesh.instanceMatrix.needsUpdate = true;
+    if (this.mesh.instanceColor) this.mesh.instanceColor.needsUpdate = true;
+  }
+}
+
+// ---------------------------------------------------------------- geometry helpers
+function rbcGeometry(seg = 34) {   // biconcave disc (Evans–Fung profile), radius 1
+  const pts = [], N = 18;
+  const h = x => 0.5 * Math.sqrt(Math.max(0, 1 - x * x)) * (0.207 + 2.003 * x * x - 1.123 * x ** 4);
+  for (let i = 0; i <= N; i++) { const x = Math.sin((i / N) * Math.PI / 2); pts.push(new THREE.Vector2(Math.max(1e-3, x), h(x) + (i === N ? 0 : 0))); }
+  for (let i = N - 1; i >= 0; i--) { const x = Math.sin((i / N) * Math.PI / 2); pts.push(new THREE.Vector2(Math.max(1e-3, x), -h(x))); }
+  const g = new THREE.LatheGeometry(pts, seg); g.computeVertexNormals(); return g;
+}
+function rbcProfileShape(R = 1) {    // the dumbbell cross-section, for the cut-open cell
+  const h = x => 0.5 * Math.sqrt(Math.max(0, 1 - x * x)) * (0.207 + 2.003 * x * x - 1.123 * x ** 4);
+  const s = new THREE.Shape(), N = 40;
+  for (let i = 0; i <= N; i++) { const x = -1 + 2 * i / N; (i ? s.lineTo.bind(s) : s.moveTo.bind(s))(x * R, h(Math.abs(x)) * R); }
+  for (let i = N; i >= 0; i--) { const x = -1 + 2 * i / N; s.lineTo(x * R, -h(Math.abs(x)) * R); }
+  return s;
+}
+function blobGeometry(r, detail, amp, freq, seed = 1) {   // organic bumpy sphere
+  const g = new THREE.IcosahedronGeometry(r, detail), p = g.attributes.position, v = V3();
+  const R = rng(seed), ph = [R() * 9, R() * 9, R() * 9];
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i); const n = v.clone().normalize();
+    const d = Math.sin(n.x * freq + ph[0]) * Math.sin(n.y * freq * 1.3 + ph[1]) * Math.sin(n.z * freq * 0.9 + ph[2]);
+    v.addScaledVector(n, d * amp); p.setXYZ(i, v.x, v.y, v.z);
+  }
+  g.computeVertexNormals(); return g;
+}
+// half of a thick-walled tube along +x, open towards the viewer (+z), so its inside and its wall layers show
+function halfShell(rIn, rOut, x0, x1, nx = 72, nth = 28) {
+  const pos = [], nor = [], idx = [];
+  const rI = typeof rIn === 'function' ? rIn : () => rIn, rO = typeof rOut === 'function' ? rOut : () => rOut;
+  const ring = (r, inward) => {
+    const base = pos.length / 3;
+    for (let i = 0; i <= nx; i++) {
+      const x = lerp(x0, x1, i / nx), rr = r(x);
+      for (let j = 0; j <= nth; j++) {
+        const th = Math.PI * j / nth, y = Math.cos(th) * rr, z = -Math.sin(th) * rr;
+        pos.push(x, y, z); const s = inward ? -1 : 1; nor.push(0, s * Math.cos(th), -s * Math.sin(th));
+      }
+    }
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nth; j++) {
+      const a = base + i * (nth + 1) + j, b = a + nth + 1;
+      if (inward) idx.push(a, a + 1, b, b, a + 1, b + 1); else idx.push(a, b, a + 1, b, b + 1, a + 1);
+    }
+  };
+  ring(rO, false); ring(rI, true);
+  // cut faces in the z = 0 plane (top strip y>0 and bottom strip y<0)
+  for (const sgn of [1, -1]) {
+    const base = pos.length / 3;
+    for (let i = 0; i <= nx; i++) { const x = lerp(x0, x1, i / nx); pos.push(x, sgn * rI(x), 0.0, x, sgn * rO(x), 0.0); nor.push(0, 0, 1, 0, 0, 1); }
+    for (let i = 0; i < nx; i++) { const a = base + 2 * i; if (sgn > 0) idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); else idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  }
+  // end caps (half annuli)
+  for (const [x, sx] of [[x0, -1], [x1, 1]]) {
+    const base = pos.length / 3;
+    for (let j = 0; j <= nth; j++) { const th = Math.PI * j / nth; pos.push(x, Math.cos(th) * rI(x), -Math.sin(th) * rI(x), x, Math.cos(th) * rO(x), -Math.sin(th) * rO(x)); nor.push(sx, 0, 0, sx, 0, 0); }
+    for (let j = 0; j < nth; j++) { const a = base + 2 * j; if (sx < 0) idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); else idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); g.setIndex(idx);
+  return g;
+}
+function tubeColors(geo, fn) {   // vertex colours along a TubeGeometry: fn(t) -> THREE.Color
+  const n = geo.parameters.tubularSegments, r = geo.parameters.radialSegments, cols = [];
+  for (let i = 0; i <= n; i++) { const c = fn(i / n); for (let j = 0; j <= r; j++) cols.push(c.r, c.g, c.b); }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); return geo;
+}
+// soft round sprite texture drawn on a canvas (mist, glow)
+function softTexture(inner = 'rgba(255,255,255,0.9)') {
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, inner); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+// ============================================================== the cut-open heart (shared by two chapters)
+// Built from the same outline as the workbook's heart diagram (mm, y down), extruded into a thick slice with a
+// rounded back. Local units are mm: x = X - 40, y = 45 - Y, z = depth (front face at z ~ 10).
+function beatAt(p) {
+  const uA = p < 0.14 ? Math.sin(Math.PI * p / 0.14) : 0;
+  const uV = p >= 0.14 && p < 0.48 ? Math.sin(Math.PI * (p - 0.14) / 0.34) : 0;
+  return { uA, uV, avOpen: !(p >= 0.15 && p < 0.5), slOpen: p >= 0.18 && p < 0.47, phase: p < 0.14 ? 0 : p < 0.48 ? 1 : 2 };
+}
+const HP = {   // flow paths through the heart (X, Y, Z in workbook mm)
+  vc: [[-18, 29.5, 5], [9, 29.5, 5]],
+  ra: [[9, 29.5, 5], [14, 25.5, 5], [20, 29, 5.5], [17, 38.5, 5]],
+  rv: [[17, 39.5, 5], [13, 50, 5], [15, 62, 5], [24, 67, 5], [31, 57, 5], [33.3, 46.5, 5]],
+  pa: [[33.3, 46.5, 5], [33.3, 14, 5], [31.6, 8.4, 5], [27.3, 6, 5], [12, 6, 5]],
+  pv: [[98, 29.5, 5], [71, 29.5, 5]],
+  la: [[71, 29.5, 5], [66, 25.5, 5], [60, 29, 5.5], [63, 38.5, 5]],
+  lv: [[63, 39.5, 5], [67, 50, 5], [65, 62, 5], [56, 69, 5], [49, 57, 5], [46.7, 46.5, 5]],
+  ao: [[46.7, 46.5, 5], [46.7, 10, 5], [48.9, 4.7, 5], [54.2, 2.5, 5], [70, 2.5, 5], [76, 4.2, 5], [79.6, 8, 5], [82, 11, 5]],
+};
+const hl = ([X, Y, Z]) => V3(X - 40, 45 - Y, Z);   // workbook mm -> heart local
+
+function heartModel(o = {}) {
+  const g = new THREE.Group();
+  const beat = { uA: { value: 0 }, uV: { value: 0 } };
+  const draw = (sh, cmds) => {
+    for (const [op, ...a] of cmds) {
+      const q = []; for (let i = 0; i < a.length; i += 2) q.push(a[i] - 40, 45 - a[i + 1]);
+      if (op === 'M') sh.moveTo(q[0], q[1]); else if (op === 'L') sh.lineTo(q[0], q[1]);
+      else if (op === 'Q') sh.quadraticCurveTo(q[0], q[1], q[2], q[3]); else sh.bezierCurveTo(q[0], q[1], q[2], q[3], q[4], q[5]);
+    }
+    return sh;
+  };
+  const OUT = [['M', 4, 22], ['Q', 4, 19, 7, 19], ['L', 27, 19], ['Q', 30, 19, 30, 22], ['L', 30, 40], ['L', 50, 40], ['L', 50, 22], ['Q', 50, 19, 53, 19],
+    ['L', 73, 19], ['Q', 76, 19, 76, 22], ['L', 76, 40], ['L', 78, 40], ['L', 78, 52], ['C', 78, 68, 60, 80, 40, 87], ['C', 20, 80, 2, 68, 2, 52], ['L', 2, 40], ['L', 4, 40], ['L', 4, 22.01]];
+  const RC = [['M', 10.5, 21.5], ['L', 23.5, 21.5], ['Q', 27.5, 21.5, 27.5, 25.5], ['L', 27.5, 34.5], ['Q', 27.5, 38.5, 23.5, 38.5], ['L', 23, 38.5], ['L', 23, 44], ['L', 36.5, 44],
+    ['L', 36.5, 75.5], ['C', 25, 71.5, 4.8, 63, 4.8, 53], ['L', 4.8, 44], ['L', 11, 44], ['L', 11, 38.5], ['L', 10.5, 38.5], ['Q', 6.5, 38.5, 6.5, 34.5], ['L', 6.5, 25.5], ['Q', 6.5, 21.5, 10.49, 21.5]];
+  const LC = [['M', 56.5, 21.5], ['L', 69.5, 21.5], ['Q', 73.5, 21.5, 73.5, 25.5], ['L', 73.5, 34.5], ['Q', 73.5, 38.5, 69.5, 38.5], ['L', 69, 38.5], ['L', 69, 44], ['L', 70.5, 44],
+    ['L', 70.5, 53], ['C', 70.5, 63, 57, 73, 43.5, 78.5], ['L', 43.5, 44], ['L', 57, 44], ['L', 57, 38.5], ['L', 56.5, 38.5], ['Q', 52.5, 38.5, 52.5, 34.5], ['L', 52.5, 25.5], ['Q', 52.5, 21.5, 56.49, 21.5]];
+
+  const mats = {
+    cut: beatify(tissue(C.muscleCut, { roughness: 0.62, clearcoat: 0.2, sheen: 0.35 }), beat),
+    side: beatify(tissue(C.muscle, { roughness: 0.4, clearcoat: 0.65 }), beat),
+    back: beatify(tissue(C.muscle, { roughness: 0.4, clearcoat: 0.65, transparent: true, opacity: 1 }), beat),
+    floorR: beatify(tissue(C.deoxyDeep, { roughness: 0.22, clearcoat: 1, sheen: 0 }), beat),
+    floorL: beatify(tissue(C.oxyDeep, { roughness: 0.22, clearcoat: 1, sheen: 0 }), beat),
+    volR: glass(C.deoxy, { opacity: 0.2, base: 0.35, beat }), volL: glass(C.oxy, { opacity: 0.2, base: 0.35, beat }),
+    vesR: new THREE.MeshPhysicalMaterial({ color: col(C.deoxy).lerp(col('#ffffff'), 0.35), transparent: true, opacity: 0.6, roughness: 0.18, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide }),
+    vesL: new THREE.MeshPhysicalMaterial({ color: col(C.oxy).lerp(col('#ffffff'), 0.3), transparent: true, opacity: 0.6, roughness: 0.18, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide }),
+    valve: tissue(C.valve, { roughness: 0.5, side: THREE.DoubleSide, sheen: 0.8 }),
+  };
+  const shape = draw(new THREE.Shape(), OUT);
+  const rHole = draw(new THREE.Path(), RC), lHole = draw(new THREE.Path(), LC);
+  shape.holes.push(rHole, lHole);
+  const front = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: 10, bevelEnabled: true, bevelThickness: 1.4, bevelSize: 1.0, bevelSegments: 3, curveSegments: 22 }), [mats.cut, mats.side]);
+  g.add(front);
+  const back = new THREE.Mesh(new THREE.ExtrudeGeometry(draw(new THREE.Shape(), OUT), { depth: 4, bevelEnabled: true, bevelThickness: 8, bevelSize: 5, bevelOffset: -4, bevelSegments: 6, curveSegments: 22 }), mats.back);
+  back.position.z = -12.6; g.add(back);
+  for (const [cmds, fm, vm] of [[RC, mats.floorR, mats.volR], [LC, mats.floorL, mats.volL]]) {
+    const s = draw(new THREE.Shape(), cmds);
+    const floor = new THREE.Mesh(new THREE.ShapeGeometry(s, 20), fm); floor.position.z = -0.3; g.add(floor);
+    const vol = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: 9.4, bevelEnabled: false, curveSegments: 20 }), vm); vol.renderOrder = 2; g.add(vol);
+  }
+  // blood vessels
+  const ves = {};
+  for (const [k, pts, m] of [['vc', HP.vc, mats.vesR], ['pa', [...HP.pa, [-6, 6, 5]], mats.vesR], ['pv', HP.pv, mats.vesL], ['ao', HP.ao, mats.vesL]]) {
+    const curve = new THREE.CatmullRomCurve3(pts.map(hl), false, 'centripetal');
+    ves[k] = new THREE.Mesh(new THREE.TubeGeometry(curve, 72, k === 'vc' || k === 'pv' ? 3.5 : 3.3, 20, false), m);
+    ves[k].renderOrder = 3; g.add(ves[k]);
+  }
+  // arrowheads: which way the blood flows in each vessel
+  const arrowGeo = new THREE.ConeGeometry(2.6, 5.2, 24); arrowGeo.translate(0, 2.6, 0);
+  const arrowMat = { R: tissue(C.deoxy, { roughness: 0.35, clearcoat: 0.8 }), L: tissue(C.oxy, { roughness: 0.35, clearcoat: 0.8 }) };
+  const arrows = [];
+  for (const [X, Y, dX, dY, side] of [[-14, 29.5, 1, 0, 'R'], [94, 29.5, -1, 0, 'L'], [-4, 6, -1, 0, 'R'], [82.4, 11.6, 0.6, 0.8, 'L']]) {
+    const m = new THREE.Mesh(arrowGeo, arrowMat[side]); m.position.copy(hl([X, Y, 5]));
+    m.quaternion.setFromUnitVectors(V3(0, 1, 0), V3(dX, -dY, 0).normalize()); g.add(m); arrows.push(m);
+  }
+  // valves: flaps on hinges. AV valves between atrium and ventricle; semilunar valves at the base of each artery
+  const flapGeo = new THREE.BoxGeometry(6.4, 0.9, 7.2); flapGeo.translate(3.2, 0, 0);
+  const cuspGeo = new THREE.BoxGeometry(3.1, 0.75, 5.6); cuspGeo.translate(1.55, 0, 0);
+  const valves = [];
+  const addValve = (geo, X, Y, mirror, kind, side) => {
+    const piv = new THREE.Group(); piv.position.copy(hl([X, Y, 5]));
+    const m = new THREE.Mesh(geo, mats.valve); piv.add(m); if (mirror) piv.scale.x = -1;
+    g.add(piv); const v = { piv, mirror, kind, side, a: kind === 'av' ? -1.2 : 1.3 }; valves.push(v); return v;
+  };
+  addValve(flapGeo, 11, 38.7, false, 'av', 'R'); addValve(flapGeo, 23, 38.7, true, 'av', 'R');
+  addValve(flapGeo, 57, 38.7, false, 'av', 'L'); addValve(flapGeo, 69, 38.7, true, 'av', 'L');
+  addValve(cuspGeo, 30.3, 43.2, false, 'sl', 'R'); addValve(cuspGeo, 36.3, 43.2, true, 'sl', 'R');
+  addValve(cuspGeo, 43.7, 43.2, false, 'sl', 'L'); addValve(cuspGeo, 49.7, 43.2, true, 'sl', 'L');
+
+  const state = { p: 0, b: beatAt(0), lub: 0, dub: 0, avWasOpen: true, slWasOpen: false, onLub: null, onDub: null };
+  function update(dt, p) {
+    const b = beatAt(p); state.p = p; state.b = b;
+    beat.uA.value = b.uA; beat.uV.value = b.uV;
+    if (state.avWasOpen && !b.avOpen && state.onLub) state.onLub();
+    if (state.slWasOpen && !b.slOpen && state.onDub) state.onDub();
+    state.avWasOpen = b.avOpen; state.slWasOpen = b.slOpen;
+    const k = 1 - Math.exp(-dt * 22);
+    for (const v of valves) {
+      const target = v.kind === 'av' ? (b.avOpen ? -1.22 : -0.1) : (b.slOpen ? 1.32 : 0.04);
+      v.a += (target - v.a) * k;
+      v.piv.rotation.z = v.mirror ? -v.a : v.a;
+      const pp = hl([0, 0, 0]); // valves ride with the squeeze of the boundary they sit on
+      void pp;
+    }
+  }
+  const labels = {};
+  const L = (key, text, X, Y, Z, o) => { const l = label(text, o); l.position.copy(hl([X, Y, Z])); g.add(l); labels[key] = l; return l; };
+  L('ra', 'right atrium', 17, 27, 9, { tone: 'deoxy', dx: -74, dy: -46 });
+  L('la', 'left atrium', 63, 27, 9, { tone: 'oxy', dx: 74, dy: -46 });
+  L('rv', 'right ventricle', 17, 60, 9, { tone: 'deoxy', dx: -86, dy: 26 });
+  L('lv', 'left ventricle', 60, 58, 9, { tone: 'oxy', dx: 88, dy: 26 });
+  L('septum', 'septum', 40, 62, 11, { dx: 0, dy: 96, sub: 'the wall between the two sides' });
+  L('vc', 'vena cava', -12, 29.5, 8, { tone: 'deoxy', dx: -10, dy: 46, sub: 'from the body' });
+  L('pa', 'pulmonary artery', 4, 6, 8, { tone: 'deoxy', dx: -40, dy: -40, sub: 'to the lungs' });
+  L('ao', 'aorta', 66, 2.5, 8, { tone: 'oxy', dx: 52, dy: -36, sub: 'to the body' });
+  L('pv', 'pulmonary vein', 90, 29.5, 8, { tone: 'oxy', dx: 6, dy: 46, sub: 'from the lungs' });
+  L('avR', 'valve between atrium and ventricle', 13.5, 41.5, 10.5, { dx: -170, dy: 8, sub: 'closes as the ventricle squeezes: “lub”' });
+  L('slL', 'valve at the start of the artery', 47.6, 42.4, 10.5, { dx: 190, dy: 6, sub: 'closes as the heart relaxes: “dub”' });
+  L('thin', 'thin wall', 3.4, 58, 9, { dx: -84, dy: 34, sub: 'pumps to the lungs' });
+  L('thick', 'thick wall', 75.5, 60, 9, { dx: 92, dy: 30, sub: 'pumps to the whole body' });
+  L('sideR', 'Right side', 16, 15, 9, { tone: 'side nodot', dx: 0, dy: -10, sub: 'to the lungs' });
+  L('sideL', 'Left side', 64, 15, 9, { tone: 'side nodot', dx: 0, dy: -10, sub: 'to the body' });
+
+  // pick hulls
+  const hulls = {
+    ra: hull(new THREE.BoxGeometry(24, 20, 14), 'ra', g, hl([17, 30, 5])), la: hull(new THREE.BoxGeometry(24, 20, 14), 'la', g, hl([63, 30, 5])),
+    rv: hull(new THREE.BoxGeometry(34, 36, 14), 'rv', g, hl([20, 60, 5])), lv: hull(new THREE.BoxGeometry(32, 36, 14), 'lv', g, hl([58, 60, 5])),
+  };
+  for (const h of Object.values(hulls)) h.visible = false;
+  return { group: g, beat, mats, valves, ves, state, update, labels, hulls, front, back, arrows };
+}
+
+// ============================================================== chapter 1: the big picture (double circulation)
+function chLoop() {
+  const ch = { id: 'loop', name: 'Big picture', group: new THREE.Group(), glow: new Glow(), legend: 'blood', labels: {} };
+  const G = ch.group, S = 0.07;
+  const H = heartModel(); H.group.scale.setScalar(S); H.group.position.set(0, 0, -5 * S); G.add(H.group);
+  const hw = p => V3((p[0] - 40) * S, (45 - p[1]) * S, (p[2] - 5) * S);
+  ch.heart = H;
+
+  // ---- organs
+  const lungMat = glass('#F49CA3', { opacity: 0.34, power: 1.6, base: 0.22 });
+  const lobes = [];
+  for (const sx of [-1, 1]) {
+    const m = new THREE.Mesh(blobGeometry(1, 4, 0.05, 7, sx > 0 ? 3 : 5), lungMat);
+    m.scale.set(1.9, 2.35, 1.25); m.position.set(sx * 2.15, 8.95, -0.6); G.add(m); lobes.push(m);
+  }
+  const airMat = glass('#E9EEF7', { opacity: 0.5, power: 1.4, base: 0.3 });
+  const trachea = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0, 12.7, -0.6), V3(0, 10.9, -0.6), V3(0, 10.5, -0.6)]), 12, 0.2, 14), airMat); G.add(trachea);
+  for (const sx of [-1, 1]) G.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(0, 10.6, -0.6), V3(sx * 0.7, 10.1, -0.6), V3(sx * 1.5, 9.7, -0.6)]), 12, 0.13, 12), airMat));
+  ch.glow.add('lungs', lungMat);
+
+  const bodyShell = glass('#F1B9AD', { opacity: 0.3, power: 1.7, base: 0.18 });
+  const body = new THREE.Mesh(new RoundedBoxGeometry(9.8, 3.3, 2.5, 4, 0.6), bodyShell); body.position.set(0, -8.15, -0.25); G.add(body);
+  const cellMat = tissue(C.tissue, { roughness: 0.55, clearcoat: 0.3, emissive: col('#FF8A5C'), emissiveIntensity: 0 });
+  const bodyCells = new THREE.InstancedMesh(new RoundedBoxGeometry(0.66, 0.66, 0.5, 2, 0.16), cellMat, 36);
+  { let i = 0; const m = new THREE.Matrix4(); for (let r = 0; r < 3; r++) for (let c = 0; c < 12; c++) { m.makeTranslation(-4.4 + c * 0.8 + (r % 2) * 0.25, -9.2 + r * 0.95, -1.05); bodyCells.setMatrixAt(i++, m); } }
+  G.add(bodyCells);
+  ch.glow.add('body', bodyShell);
+
+  // ---- vessel paths in world units
+  const L0 = V3(-3.6, 8.45, -0.55), L1 = V3(3.6, 8.45, -0.55), B0 = V3(3.7, -8.05, -0.15), B1 = V3(-3.7, -8.05, -0.15);
+  const P = {
+    vcOut: [B1, V3(-4.45, -6.6, -0.1), V3(-4.95, -3.6, 0), V3(-4.85, -0.5, 0), V3(-4.5, 0.85, 0), hw([-18, 29.5, 5])],
+    paOut: [hw([12, 6, 5]), V3(-3.4, 2.86, 0), V3(-4.55, 3.6, -0.2), V3(-5.0, 5.6, -0.4), V3(-4.6, 7.4, -0.5), L0],
+    pvOut: [L1, V3(4.6, 7.4, -0.5), V3(5.0, 5.6, -0.5), V3(4.95, 3.3, -0.4), V3(4.6, 1.6, -0.15), hw([98, 29.5, 5])],
+    aoOut: [hw([82, 11, 5]), V3(3.1, 2.0, -0.9), V3(2.4, 1.3, -2.15), V3(1.6, -0.4, -2.35), V3(1.2, -2.2, -2.2), V3(1.9, -3.6, -1.6), V3(3.2, -5.0, -1.0), V3(4.0, -6.5, -0.55), B0],
+  };
+  const R = rng(11);
+  const lungBranches = [], bodyBranches = [];
+  for (let k = 0; k < 9; k++) {
+    const a = -1.45 + 2.9 * (k / 8), z = -1.2 + R() * 1.2;
+    lungBranches.push(new Path([L0, V3(-2.5, 8.6 + a * 0.9, z), V3(-1.1, 9.1 + a * 1.05, z - 0.15), V3(1.1, 9.1 + a * 1.05, z - 0.15), V3(2.5, 8.6 + a * 0.9, z), L1]));
+  }
+  for (let k = 0; k < 9; k++) {
+    const a = -1.0 + 2.0 * (k / 8), z = -0.25 + R() * 0.6;
+    bodyBranches.push(new Path([B0, V3(2.6, -8.1 + a * 1.1, z), V3(0.9, -8.1 + a * 1.25, z + 0.1), V3(-0.9, -8.1 + a * 1.25, z + 0.1), V3(-2.6, -8.1 + a * 1.1, z), B1]));
+  }
+  const seg = (pts, rn, rb, o = {}) => ({ paths: [new Path(pts, o)], rn, rb: rb ?? rn, ...o });
+  const SEG = [
+    seg(P.vcOut, 0.13), seg(HP.vc.map(hw), 0.13),
+    seg(HP.ra.map(hw), 0.38, 0.19), seg(HP.rv.map(hw), 0.36, 0.19),
+    seg(HP.pa.map(hw), 0.12), seg(P.paOut, 0.12),
+    { paths: lungBranches, rn: 0, rb: 0 },
+    seg(P.pvOut, 0.13), seg(HP.pv.map(hw), 0.13),
+    seg(HP.la.map(hw), 0.38, 0.19), seg(HP.lv.map(hw), 0.36, 0.19),
+    seg(HP.ao.map(hw), 0.12), seg(P.aoOut, 0.12),
+    { paths: bodyBranches, rn: 0, rb: 0 },
+  ];
+  const KIND = ['v', 'v', 'h', 'h', 'a', 'a', 'c', 'v', 'v', 'h', 'h', 'a', 'a', 'c'];
+  const STOP = [0, 0, 1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 8, 9];
+  SEG.forEach((s, i) => { s.kind = KIND[i]; s.i = i; });
+
+  // ---- vessel tubes
+  const vesR = H.mats.vesR.clone(), vesL = H.mats.vesL.clone();
+  const tube = (pts, m, r = 0.245) => { const t = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'centripetal'), 80, r, 16), m); t.renderOrder = 3; G.add(t); return t; };
+  tube(P.vcOut, vesR); tube(P.paOut, vesR); tube(P.pvOut, vesL); tube(P.aoOut, vesL);
+  const chevGeo = new THREE.ConeGeometry(0.2, 0.42, 18); chevGeo.translate(0, 0.21, 0);
+  const chevMat = { R: tissue(C.deoxy, { roughness: 0.35, clearcoat: 0.8 }), L: tissue(C.oxy, { roughness: 0.35, clearcoat: 0.8 }) };
+  for (const [pts, side, ts] of [[P.vcOut, 'R', [0.3, 0.68]], [P.paOut, 'R', [0.55]], [P.pvOut, 'L', [0.45]], [P.aoOut, 'L', [0.8]]]) {
+    const cv = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
+    for (const t of ts) { const m = new THREE.Mesh(chevGeo, chevMat[side]); m.position.copy(cv.getPointAt(t)); m.quaternion.setFromUnitVectors(V3(0, 1, 0), cv.getTangentAt(t)); m.renderOrder = 4; G.add(m); }
+  }
+  ch.glow.add('vR', vesR, H.mats.vesR); ch.glow.add('vL', vesL, H.mats.vesL);
+  const capMat = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.3, clearcoat: 0.6, transparent: true, opacity: 0.55, depthWrite: false });
+  const cD = col(C.deoxy), cO = col(C.oxy), tmpC = new THREE.Color();
+  for (const p of lungBranches) { const g = new THREE.TubeGeometry(p.curve, 64, 0.075, 8); tubeColors(g, t => tmpC.lerpColors(cD, cO, sstep(0.15, 0.6, t)).clone()); const m = new THREE.Mesh(g, capMat); m.renderOrder = 2; G.add(m); }
+  for (const p of bodyBranches) { const g = new THREE.TubeGeometry(p.curve, 64, 0.075, 8); tubeColors(g, t => tmpC.lerpColors(cO, cD, sstep(0.3, 0.75, t)).clone()); const m = new THREE.Mesh(g, capMat); m.renderOrder = 2; G.add(m); }
+
+  // ---- the blood itself
+  const SPEED = { a: 2.5, v: 1.6, h: 1.15, c: 0.7 };
+  const st = { hr: 72, flowK: 1, p: 0, breath: 0, follow: false, slow: 1 };
+  const sv = h => 70 + clamp((h - 72) * 0.45, 0, 48);
+  const oxyOf = (s, t) => (s.i <= 5 ? 0 : s.i === 6 ? sstep(0.15, 0.6, t) : s.i <= 12 ? 1 : 1 - sstep(0.3, 0.75, t));
+  const speedOf = (s, c) => {
+    let v = SPEED[s.kind] * st.flowK * st.slow * (c ? c.j : 1);
+    if (s.kind === 'a') v *= 0.55 + 0.95 * H.beat.uV.value;
+    return v;
+  };
+  const nextSeg = (c, Rr) => { c.seg = (c.seg + 1) % SEG.length; c.br = SEG[c.seg].paths.length > 1 ? Math.floor(Rr() * SEG[c.seg].paths.length) : 0; };
+  const squeeze = (s, P3) => { if (s.kind !== 'h') return; const p = { x: P3.x / S, y: P3.y / S }; squeezePoint(p, H.beat.uA.value, H.beat.uV.value); P3.x = p.x * S; P3.y = p.y * S; };
+  const transit = SEG.map(s => s.paths[0].len / SPEED[s.kind]), total = transit.reduce((a, b) => a + b, 0);
+  const rbcGeo = rbcGeometry();
+  const rbcMat = new THREE.MeshPhysicalMaterial({ roughness: 0.38, clearcoat: 0.7, clearcoatRoughness: 0.3, sheen: 0.3, sheenColor: col('#ffffff') });
+  const flow = new Flow({
+    parent: G, count: 620, geometry: rbcGeo, material: rbcMat, size: 0.1, seed: 4, segs: SEG,
+    init: (c, Rr) => { let u = Rr() * total, i = 0; while (u > transit[i] && i < SEG.length - 1) { u -= transit[i]; i++; } c.seg = i; c.t = u / transit[i]; c.br = SEG[i].paths.length > 1 ? Math.floor(Rr() * SEG[i].paths.length) : 0; },
+    next: nextSeg, speed: (c, s) => speedOf(s, c),
+    color: (c, s, out) => out.lerpColors(cD, cO, oxyOf(s, c.t)),
+    pos: (c, s, P3) => squeeze(s, P3),
+  });
+
+  // ---- one cell to follow
+  const heroMat = rbcMat.clone(); heroMat.emissive = col('#ffffff'); heroMat.emissiveIntensity = 0.12;
+  heroMat.depthTest = false; heroMat.transparent = true;   // drawn on top of the vessel walls, so it is never hidden
+  const hero = new THREE.Mesh(rbcGeo, heroMat); hero.scale.setScalar(0.3); hero.visible = false; hero.renderOrder = 12; G.add(hero);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.62, 56), new THREE.MeshBasicMaterial({ color: '#FFB81F', transparent: true, opacity: 1, depthTest: false, side: THREE.DoubleSide }));
+  ring.renderOrder = 13; ring.visible = false; G.add(ring);
+  const ringEdge = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.67, 56), new THREE.MeshBasicMaterial({ color: '#141D36', transparent: true, opacity: 0.85, depthTest: false, side: THREE.DoubleSide }));
+  ringEdge.renderOrder = 13; ring.add(ringEdge);
+  const haloS = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTexture('rgba(255,184,31,0.75)'), transparent: true, depthTest: false, opacity: 0.7 }));
+  haloS.scale.setScalar(2.0); haloS.renderOrder = 10; haloS.visible = false; G.add(haloS);
+  const NTR = 34, trail = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.85, depthTest: false }), NTR);
+  trail.renderOrder = 9; trail.frustumCulled = false; trail.visible = false; G.add(trail);
+  const trailPts = []; for (let i = 0; i < NTR; i++) trail.setColorAt(i, col('#ffffff'));
+  const heroLabel = label('this cell', { tone: 'follow nodot', dx: 0, dy: -38 }); G.add(heroLabel);
+  const H_ = { seg: 0, t: 0, br: 0, stop: -1, pos: V3(), smooth: V3(), dist: 6 };
+  const tmpP = V3(), tmpT = V3(), tmpN = V3(), tmpB = V3();
+  function heroUpdate(dt) {
+    const s = SEG[H_.seg]; const path = s.paths[H_.br];
+    H_.t += (speedOf(s) * dt) / path.len;
+    while (H_.t >= 1) { H_.t -= 1; H_.seg = (H_.seg + 1) % SEG.length; H_.br = SEG[H_.seg].paths.length > 1 ? 4 : 0; }
+    const s2 = SEG[H_.seg]; s2.paths[H_.br].at(H_.t, tmpP); squeeze(s2, tmpP);
+    hero.position.copy(tmpP); ring.position.copy(tmpP); haloS.position.copy(tmpP); heroLabel.position.copy(tmpP);
+    hero.rotation.x += dt * 0.9; hero.rotation.y += dt * 0.6;
+    heroMat.color.lerpColors(cD, cO, oxyOf(s2, H_.t));
+    ring.quaternion.copy(camera.quaternion); ring.scale.setScalar(1 + 0.08 * Math.sin(performance.now() / 260));
+    H_.pos.copy(tmpP);
+    trailPts.unshift(tmpP.clone()); if (trailPts.length > NTR * 3) trailPts.length = NTR * 3;
+    for (let i = 0; i < NTR; i++) {
+      const p = trailPts[Math.min(trailPts.length - 1, i * 3)], k = 1 - i / NTR;
+      _M.compose(p, _Q.identity(), _S.setScalar(0.085 * k + 0.01)); trail.setMatrixAt(i, _M); trail.setColorAt(i, _C.copy(heroMat.color).lerp(col('#ffffff'), 0.25));
+    }
+    trail.instanceMatrix.needsUpdate = true; trail.instanceColor.needsUpdate = true;
+    const stop = STOP[H_.seg];
+    if (stop !== H_.stop) { H_.stop = stop; setLabelText(heroLabel, STOPS[stop][0]); if (ch.onStop) ch.onStop(stop); }
+  }
+  const STOPS = [
+    ['vena cava', 'deoxy', 'Back from the body, low in oxygen.'],
+    ['right atrium', 'deoxy', 'Collects blood coming back from the body.'],
+    ['right ventricle', 'deoxy', 'Squeezes it out to the lungs.'],
+    ['pulmonary artery', 'deoxy', 'Carries it to the lungs.'],
+    ['lung capillaries', 'mix', 'Oxygen diffuses in. The cell is now rich in oxygen (shown red).'],
+    ['pulmonary vein', 'oxy', 'Brings it back to the heart, full of oxygen.'],
+    ['left atrium', 'oxy', 'Collects blood coming back from the lungs.'],
+    ['left ventricle', 'oxy', 'Gives the strongest squeeze: out to the whole body.'],
+    ['aorta', 'oxy', 'The biggest artery, carrying blood to the body.'],
+    ['body capillaries', 'mix', 'Oxygen diffuses out to the cells. The cell is now low in oxygen (shown blue).'],
+  ];
+
+  // ---- labels
+  const L = (key, text, pos, o) => { const l = label(text, o); l.position.copy(pos); G.add(l); ch.labels[key] = l; };
+  L('heart', 'heart', V3(0.6, -2.6, 0.5), { dx: 84, dy: 30 });
+  L('lungs', 'lungs', V3(3.4, 10.4, -0.2), { dx: 64, dy: -26 });
+  L('body', 'body cells', V3(3.9, -8.6, 0.9), { dx: 56, dy: 40, sub: 'muscles, brain, every organ' });
+  L('pa', 'pulmonary artery', V3(-4.95, 5.4, -0.4), { tone: 'deoxy', dx: -82, dy: 0 });
+  L('pv', 'pulmonary vein', V3(4.98, 5.4, -0.5), { tone: 'oxy', dx: 80, dy: 0 });
+  L('ao', 'aorta', V3(3.6, -3.0, -1.2), { tone: 'oxy', dx: 72, dy: 0 });
+  L('vc', 'vena cava', V3(-4.95, -3.0, 0), { tone: 'deoxy', dx: -70, dy: 0 });
+  L('sideR', 'Right side', V3(-1.65, 3.7, 0.4), { tone: 'side nodot', dx: 0, dy: -8 });
+  L('sideL', 'Left side', V3(1.65, 3.7, 0.4), { tone: 'side nodot', dx: 0, dy: -8 });
+  L('lungCap', 'capillaries in the lungs', V3(0, 7.55, -0.3), { dx: 0, dy: 70, sub: 'oxygen in, carbon dioxide out' });
+  L('bodyCap', 'capillaries in the body', V3(0, -7.2, 0.1), { dx: 0, dy: -64, sub: 'oxygen out to the cells' });
+  ch.glow.add('heart', H.mats.side, H.mats.cut);
+
+  // ---- pick hulls for the quick check
+  const hullR = hull(new THREE.BoxGeometry(2.9, 6.6, 1.6), 'right', G, V3(-1.5, 0.1, 0)); hullR.visible = false;
+  const hullL = hull(new THREE.BoxGeometry(2.9, 6.6, 1.6), 'left', G, V3(1.5, 0.1, 0)); hullL.visible = false;
+
+  ch.update = (dt, time) => {
+    const period = 60 / st.hr;
+    st.p = (st.p + (dt * st.slow) / period) % 1;
+    H.update(dt, st.p);
+    st.breath += (dt * st.slow * (12 + (st.hr - 72) * 0.22)) / 60;
+    const b = 1 + 0.045 * Math.sin(st.breath * TAU);
+    for (const l of lobes) l.scale.set(1.9 * b, 2.35 * b, 1.25 * b);
+    const ex = clamp((st.hr - 72) / 100, 0, 1);
+    cellMat.emissiveIntensity = ex * (0.18 + 0.1 * Math.sin(time * 6));
+    flow.update(dt, time);
+    if (st.follow) {
+      heroUpdate(dt);
+      const stop = STOP[H_.seg];
+      const want = fitDistance(8.5, [1, 2, 6, 7].includes(stop) ? 8.5 : 10.5, 1.0);
+      H_.dist += (want - H_.dist) * (1 - Math.exp(-dt * 1.2));
+      // follow the cell, but lean towards the middle of the loop so the organs stay in the picture
+      const k = 1 - Math.exp(-dt * 1.8);
+      H_.smooth.lerp(V3(H_.pos.x * 0.55, H_.pos.y * 0.8 + 0.3, -0.3), k);
+      controls.target.copy(H_.smooth);
+      const dir = camera.position.clone().sub(controls.target).normalize();
+      dir.lerp(V3(0.12, 0.12, 1).normalize(), 1 - Math.exp(-dt * 0.8)).normalize();
+      camera.position.copy(controls.target).addScaledVector(dir, H_.dist);
+    }
+  };
+  function setFollow(on) {
+    st.follow = on; hero.visible = ring.visible = haloS.visible = trail.visible = on; heroLabel.visible = on; heroLabel.userData.el.classList.toggle('on', on);
+    st.slow = on ? 0.55 : 1;
+    if (on) {
+      H_.seg = 0; H_.t = 0.15; H_.br = 0; H_.stop = -1; trailPts.length = 0; heroUpdate(0);
+      H_.smooth.copy(controls.target); H_.dist = camera.position.distanceTo(controls.target); CAM.token++; CAM.follow = true;
+    } else CAM.follow = null;
+  }
+  function setHR(v) { st.hr = v; st.flowK = (v / 72) * (sv(v) / sv(72)); }
+  ch.exit = () => { setFollow(false); setHR(72); };
+
+  const overview = { t: [0, 1.6, -0.3], dir: [0.16, 0.1, 1], w: 13, h: 23 };
+  ch.steps = [
+    {
+      title: 'One loop, through the heart twice',
+      text: 'Blood travels round your body in a loop. On every trip it passes through your <b>heart twice</b>: once on the way to the <b>lungs</b>, once on the way to the <b>body</b>.',
+      cam: overview, labels: ['heart', 'lungs', 'body'], focus: [],
+    },
+    {
+      title: 'In the lungs, blood picks up oxygen',
+      text: 'Blood arrives at the lungs <span class="t-deoxy">blue: low in oxygen</span>. In the tiny capillaries, oxygen diffuses in and it leaves <span class="t-oxy">red: rich in oxygen</span>. Blue is only a diagram colour: real blood is always red.',
+      cam: { t: [0, 6.2, -0.4], dir: [0.12, 0.14, 1], w: 15.5, h: 9.8 }, labels: ['pa', 'pv', 'lungCap'], focus: ['lungs'],
+    },
+    {
+      title: 'In the body, the cells take the oxygen',
+      text: 'The left side of the heart pumps <span class="t-oxy">oxygen-rich blood</span> down the aorta. In the body\'s capillaries, oxygen and glucose diffuse into the cells, and the blood returns <span class="t-deoxy">low in oxygen</span> through the vena cava.',
+      cam: { t: [0, -4.6, -0.3], dir: [0.14, 0.1, 1], w: 15, h: 11 }, labels: ['ao', 'vc', 'bodyCap'], focus: ['body'],
+    },
+    {
+      title: 'Follow one red blood cell',
+      text: 'Watch the glowing cell. The list lights up each place on its journey as the cell gets there. Notice when it changes colour.',
+      cam: overview, labels: [], focus: [], follow: true,
+      ctl: (el) => {
+        el.innerHTML = `<div class="route">${STOPS.map(([n, c], i) => `<span class="${c}" data-i="${i}">${n}</span>`).join('')}</div><p class="narr"><em>Now</em><span id="narrTxt">Starting in the vena cava…</span></p>`
+          + `<div class="row"><button class="btn small" id="restartCell">Start again</button></div>`;
+        const chips = [...el.querySelectorAll('.route span')], narr = el.querySelector('#narrTxt');
+        ch.onStop = i => { chips.forEach((c, k) => { c.classList.toggle('now', k === i); c.classList.toggle('done', k < i); }); narr.textContent = `${STOPS[i][0][0].toUpperCase()}${STOPS[i][0].slice(1)}: ${STOPS[i][2]}`; };
+        el.querySelector('#restartCell').onclick = () => setFollow(true);
+        setFollow(true);
+        return () => { ch.onStop = null; setFollow(false); };
+      },
+    },
+    {
+      title: 'Exercise: the heart speeds up',
+      text: 'Drag the slider. Working muscles respire faster, so they need more oxygen and glucose. The heart beats faster and harder, and more blood reaches them every minute.',
+      cam: overview, labels: ['heart', 'body'], focus: ['body'],
+      ctl: (el) => {
+        el.innerHTML = `<div class="slider"><label for="hr">Heart rate <span id="hrv">72</span></label><input id="hr" type="range" min="60" max="180" step="1" value="72"></div>`
+          + `<div class="readout"><div><b id="o1">72</b><span>beats per minute</span></div><div><b id="o2">5.0</b><span>litres of blood pumped per minute</span></div></div>`
+          + `<p class="mini">Resting is about 60 to 80 beats per minute. A sprint can push it past 170.</p>`;
+        const r = el.querySelector('#hr');
+        const upd = () => { const v = +r.value; setHR(v); el.querySelector('#hrv').textContent = v; el.querySelector('#o1').textContent = v; el.querySelector('#o2').textContent = ((v * sv(v)) / 1000).toFixed(1); };
+        r.oninput = upd; upd();
+        return () => setHR(72);
+      },
+    },
+    {
+      title: 'Quick check',
+      text: 'Tap the side of the heart that pumps blood <b>to the lungs</b>.',
+      cam: { t: [0, 0.4, 0], dir: [0.06, 0.08, 1], w: 11, h: 9 }, labels: [], focus: [],
+      check: { answer: 'right', pick: [hullR, hullL],
+        yes: 'Yes: the <b>right side</b>. It looks like it is on your left because the heart faces you, the way a person would.',
+        no: 'The side that pumps to the lungs is the <b>right side</b>. It is on your left in the picture because the heart faces you.' },
+      labelsAfter: ['sideR', 'sideL'],
+    },
+  ];
+  return ch;
+}
+
+// ============================================================== chapter 2: blood
+function chBlood() {
+  const ch = { id: 'blood', name: 'Blood', group: new THREE.Group(), glow: new Glow(), legend: 'parts', labels: {} };
+  const G = ch.group;
+  const stA = new THREE.Group(), stB = new THREE.Group(), stC = new THREE.Group();
+  G.add(stA, stB, stC);
+  const L = (parent, key, text, pos, o) => { const l = label(text, o); l.position.copy(pos); parent.add(l); ch.labels[key] = l; return l; };
+
+  // ================= A: the centrifuge
+  const metal = new THREE.MeshPhysicalMaterial({ color: '#5E677C', metalness: 0.55, roughness: 0.32, clearcoat: 0.6 });
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 3.7, 0.9, 64), new THREE.MeshPhysicalMaterial({ color: '#D9DEE9', roughness: 0.5, clearcoat: 0.4 }));
+  base.position.y = -0.95; stA.add(base);
+  const rotor = new THREE.Group(); stA.add(rotor);
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(2.9, 2.9, 0.32, 64), metal); rotor.add(disc);
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.6, 32), metal); hub.position.y = 0.3; rotor.add(hub);
+  // tube geometry: glass wall + contents built from the same profile
+  const TR = 0.42, TH = 3.6;
+  const wallX = h => (h < TR ? Math.sqrt(Math.max(0, TR * TR - (TR - h) * (TR - h))) : TR);
+  const fill = (h0, h1, r = TR * 0.94) => {
+    const pts = [new THREE.Vector2(0.001, h0)]; const n = 18;
+    for (let i = 0; i <= n; i++) { const h = lerp(h0, h1, i / n); pts.push(new THREE.Vector2(Math.max(0.001, wallX(h) * (r / TR)), h)); }
+    pts.push(new THREE.Vector2(0.001, h1)); return new THREE.LatheGeometry(pts, 40);
+  };
+  const glassPts = []; for (let i = 0; i <= 24; i++) { const h = (TH * i) / 24; glassPts.push(new THREE.Vector2(Math.max(0.001, wallX(h) + 0.03), h)); }
+  const tubeGlass = new THREE.Mesh(new THREE.LatheGeometry(glassPts, 40), glass('#DDE8FF', { opacity: 0.5, power: 1.4, base: 0.08 }));
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.36, 32), new THREE.MeshPhysicalMaterial({ color: '#7C5CD6', roughness: 0.4, clearcoat: 0.6 }));
+  cap.position.y = TH + 0.14;
+  const HB = 2.95, H_RBC = 1.3, H_BUF = 1.37;
+  const whole = new THREE.Mesh(fill(0.02, HB), tissue('#9E1F27', { roughness: 0.25, clearcoat: 1, sheen: 0 }));
+  const layRBC = new THREE.Mesh(fill(0.02, H_RBC), tissue('#B3242C', { roughness: 0.25, clearcoat: 1, sheen: 0 }));
+  const layBuf = new THREE.Mesh(fill(H_RBC, H_BUF), tissue('#FBF7EF', { roughness: 0.5 }));
+  const layPla = new THREE.Mesh(fill(H_BUF, HB), new THREE.MeshPhysicalMaterial({ color: '#F4C14A', roughness: 0.12, transmission: 0, transparent: true, opacity: 0.82, clearcoat: 1 }));
+  layRBC.visible = layBuf.visible = layPla.visible = false;
+  const tube = new THREE.Group(); tube.add(tubeGlass, cap, whole, layRBC, layBuf, layPla);
+  const balance = tube.clone(true);   // the second tube is blood too: a centrifuge must be balanced
+  const slotA = new THREE.Group(), slotB = new THREE.Group();
+  slotA.position.set(2.1, 0.2, 0); slotB.position.set(-2.1, 0.2, 0); slotB.rotation.y = Math.PI;
+  rotor.add(slotA, slotB); slotA.add(tube); slotB.add(balance);
+  tube.position.y = 0; balance.position.y = 0;
+  ch.glow.add('tube', tubeGlass.material);
+  const lift = new THREE.Group(); stA.add(lift); lift.position.set(0, 0.9, 1.6);
+  // the labels ride on the tube, so they line up with its layers at any size
+  L(tube, 'plasma', 'plasma', V3(TR, (H_BUF + HB) / 2, 0), { tone: 'sugar', dx: 100, dy: -10, sub: 'about 55% · a yellow liquid' });
+  L(tube, 'buffy', 'white blood cells and platelets', V3(TR, (H_RBC + H_BUF) / 2, 0), { dx: 110, dy: 30, sub: 'under 1%' });
+  L(tube, 'rbcLayer', 'red blood cells', V3(TR, H_RBC / 2, 0), { tone: 'oxy', dx: 100, dy: 50, sub: 'about 45%' });
+  const camSpin = { t: [0, 1.3, 0.4], dir: [0.12, 0.42, 1], w: 9.5, h: 7.2 }, camTube = { t: [0.9, 3.0, 1.6], dir: [0.1, 0.12, 1], w: 7.6, h: 5.6 };
+  const spin = { w: 0, t: -1, state: 'idle' };
+  function resetTube() {
+    slotA.add(tube); tube.position.set(0, 0, 0); tube.rotation.set(0, 0, 0); tube.scale.setScalar(1);
+    whole.visible = true; layRBC.visible = layBuf.visible = layPla.visible = false; rotor.rotation.y = 0; slotA.rotation.z = slotB.rotation.z = 0;
+    for (const [i, v] of [[2, true], [3, false], [4, false], [5, false]]) balance.children[i].visible = v;
+    balance.visible = true;
+  }
+  function startSpin(fly) { resetTube(); spin.t = 0; spin.state = 'spin'; for (const k of ['plasma', 'buffy', 'rbcLayer']) ch.showLabel?.(k, false); if (fly) flyTo(camSpin, 1.0); }
+  function updateSpin(dt) {
+    if (spin.state !== 'spin') return;
+    spin.t += dt; const t = spin.t;
+    spin.w = t < 1.1 ? 15 * easeIO(t / 1.1) : t < 2.7 ? 15 : t < 4.0 ? 15 * (1 - easeIO((t - 2.7) / 1.3)) : 0;
+    rotor.rotation.y += spin.w * dt;
+    const tilt = Math.min(1, spin.w / 9) * 1.1;
+    slotA.rotation.z = -tilt; slotB.rotation.z = -tilt;
+    if (t > 1.8 && whole.visible) { whole.visible = false; layRBC.visible = layBuf.visible = layPla.visible = true;
+      for (const [i, v] of [[2, false], [3, true], [4, true], [5, true]]) balance.children[i].visible = v; }
+    if (t >= 4.0) {
+      spin.state = 'lift';
+      const wp = V3(); tube.getWorldPosition(wp); lift.worldToLocal(wp);
+      lift.add(tube); tube.position.copy(wp); tube.rotation.set(0, 0, 0);
+      const p0 = tube.position.clone();
+      flyTo(camTube, 1.3); balance.visible = false;
+      tween(1.1, k => { tube.position.lerpVectors(p0, V3(0, 0, 0), k); tube.scale.setScalar(lerp(1, 1.2, k)); })
+        .then(() => { spin.state = 'done'; for (const k of ['plasma', 'buffy', 'rbcLayer']) ch.showLabel?.(k, true); });
+    }
+  }
+
+  // ================= B: inside a drop of blood
+  const bgMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, uniforms: { uA: { value: col('#FCE7B5') }, uB: { value: col('#E9B95C') } },
+    vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: 'uniform vec3 uA; uniform vec3 uB; varying vec3 vP; void main(){ float k = smoothstep(-0.6, 0.9, vP.y*0.6 + vP.z*0.5); gl_FragColor = vec4(mix(uB, uA, k), 1.0);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}',
+  });
+  const bg = new THREE.Mesh(new THREE.SphereGeometry(60, 32, 16), bgMat); stB.add(bg);
+  const Rb = rng(21), rbcGeo = rbcGeometry();
+  const rbcMatB = new THREE.MeshPhysicalMaterial({ color: '#D2333A', roughness: 0.34, clearcoat: 0.8, sheen: 0.4, sheenColor: col('#FF9C9C') });
+  const NB = 110, drift = [];
+  const rbcs = new THREE.InstancedMesh(rbcGeo, rbcMatB, NB); rbcs.frustumCulled = false; stB.add(rbcs);
+  for (let i = 0; i < NB; i++) drift.push({ p: V3(-30 + Rb() * 60, -15 + Rb() * 30, -40 + Rb() * 28), ax: V3(Rb() - 0.5, Rb() - 0.5, Rb() - 0.5).normalize(), a: Rb() * TAU, v: 0.25 + Rb() * 0.35 });
+  const wbcMat = tissue('#E6E2FF', { roughness: 0.55, transparent: true, opacity: 0.7, depthWrite: false, clearcoat: 0.3, sheen: 0.9, sheenColor: col('#FFFFFF') });
+  const nucMat = tissue('#7B4FC0', { roughness: 0.4 });
+  const wbcs = [];
+  for (const [x, y, z, s] of [[0, 0.2, 0, 2.0], [13, -6, -26, 1.9], [-15, 7, -32, 1.8]]) {
+    const g = new THREE.Group(); g.position.set(x, y, z);
+    const m = new THREE.Mesh(blobGeometry(s, 4, 0.08, 9, (x * 7) | 0), wbcMat); m.userData.pick = 'wbc'; m.renderOrder = 3; g.add(m);
+    for (const [a, b, c] of [[-0.35, 0.15, 0], [0.32, 0.22, 0.05], [0.02, -0.3, -0.05]]) { const n = new THREE.Mesh(new THREE.SphereGeometry(s * 0.34, 20, 14), nucMat); n.position.set(a * s, b * s, c * s); g.add(n); }
+    stB.add(g); wbcs.push(g);
+  }
+  ch.glow.add('wbc', wbcMat, nucMat);
+  const platGeo = new THREE.IcosahedronGeometry(1, 1); platGeo.scale(0.3, 0.12, 0.22);
+  const platMat = tissue('#8E7CD0', { roughness: 0.5 });
+  const NP = 40, plats = new THREE.InstancedMesh(platGeo, platMat, NP); plats.frustumCulled = false; stB.add(plats);
+  const pdrift = []; for (let i = 0; i < NP; i++) pdrift.push({ p: V3(-26 + Rb() * 52, -13 + Rb() * 26, -28 + Rb() * 22), ax: V3(Rb(), Rb(), Rb()).normalize(), a: Rb() * TAU, v: 0.3 + Rb() * 0.3 });
+  ch.glow.add('platelet', platMat); ch.glow.add('rbc', rbcMatB);
+  // the line-up in front: one of each
+  const heroRBC = new THREE.Mesh(rbcGeo, rbcMatB); heroRBC.scale.setScalar(1.1); heroRBC.position.set(-4.7, 0.2, 0); heroRBC.rotation.set(0.95, 0, 0.18); heroRBC.userData.pick = 'rbc'; stB.add(heroRBC);
+  const heroPlats = [];
+  for (const [x, y, z] of [[4.3, 0.75, 0.2], [5.1, 0.05, -0.2], [4.1, -0.35, 0.3], [5.05, 0.95, -0.4]]) { const m = new THREE.Mesh(platGeo, platMat); m.position.set(x, y, z); m.scale.setScalar(1.25); m.rotation.set(Rb() * 3, Rb() * 3, 0); m.userData.pick = 'platelet'; stB.add(m); heroPlats.push(m); }
+  L(stB, 'dRbc', 'red blood cell', V3(-4.7, 0.95, 0), { tone: 'oxy', dx: 0, dy: -70 });
+  L(stB, 'dWbc', 'white blood cell', V3(0, 2.15, 0), { tone: 'warn', dx: 0, dy: -44 });
+  L(stB, 'dPlat', 'platelets', V3(4.6, 1.15, 0), { tone: 'warn', dx: 0, dy: -62 });
+  L(stB, 'dPlasma', 'plasma', V3(-4.6, -2.7, 0), { tone: 'nodot', dx: 0, dy: 0, sub: 'the yellow liquid all around' });
+  const PARTS = {
+    plasma: ['#F2C14A', 'Plasma', 'A yellow liquid, mostly water. It carries the blood cells, plus dissolved glucose, carbon dioxide, urea, hormones and salts.'],
+    rbc: ['#D2333A', 'Red blood cells', 'Carry oxygen from the lungs to every cell. A drop of blood the size of a pinhead holds about 5 million.'],
+    wbc: ['#8B6FD6', 'White blood cells', 'Destroy pathogens, the microbes that cause disease. Some engulf them; others make antibodies. Each has a nucleus.'],
+    platelet: ['#8E7CD0', 'Platelets', 'Tiny fragments of cells. They help blood to clot at a cut, which stops bleeding and keeps pathogens out.'],
+  };
+  const PART_LABEL = { plasma: 'dPlasma', rbc: 'dRbc', wbc: 'dWbc', platelet: 'dPlat' };
+  const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = V3();
+  function updateDrop(dt, time) {
+    for (let i = 0; i < NB; i++) { const d = drift[i]; d.p.x += d.v * dt; if (d.p.x > 26) d.p.x -= 52; d.a += dt * 0.35; _q.setFromAxisAngle(d.ax, d.a); _s.setScalar(0.62); _m.compose(d.p, _q, _s); rbcs.setMatrixAt(i, _m); }
+    rbcs.instanceMatrix.needsUpdate = true;
+    for (let i = 0; i < NP; i++) { const d = pdrift[i]; d.p.x += d.v * dt; if (d.p.x > 26) d.p.x -= 52; d.a += dt * 0.6; _q.setFromAxisAngle(d.ax, d.a); _s.setScalar(1); _m.compose(d.p, _q, _s); plats.setMatrixAt(i, _m); }
+    plats.instanceMatrix.needsUpdate = true;
+    wbcs.forEach((w, i) => { w.rotation.y += dt * 0.12 * (i + 1); });
+    heroRBC.position.y = 0.2 + Math.sin(time * 0.9) * 0.08;
+    heroPlats.forEach((m, i) => { m.rotation.y += dt * (0.4 + i * 0.1); });
+    if (scene.fog) { const d = camera.position.distanceTo(controls.target); scene.fog.near = d + 6; scene.fog.far = d + 46; }
+  }
+
+  // ================= C: one red blood cell, cut open
+  const RR = 3;
+  const cellMat = new THREE.MeshPhysicalMaterial({ color: '#8E1D27', roughness: 0.3, clearcoat: 0.85, clearcoatRoughness: 0.25, sheen: 0.5, sheenColor: col('#FF8080'), side: THREE.DoubleSide });
+  const fullCell = new THREE.Mesh(rbcGeometry(64), cellMat); fullCell.scale.setScalar(RR);
+  const halfPts = []; { const N = 26, h = x => 0.5 * Math.sqrt(Math.max(0, 1 - x * x)) * (0.207 + 2.003 * x * x - 1.123 * x ** 4);
+    for (let i = 0; i <= N; i++) { const x = Math.sin((i / N) * Math.PI / 2); halfPts.push(new THREE.Vector2(Math.max(1e-3, x), h(x))); }
+    for (let i = N - 1; i >= 0; i--) { const x = Math.sin((i / N) * Math.PI / 2); halfPts.push(new THREE.Vector2(Math.max(1e-3, x), -h(x))); } }
+  const halfCell = new THREE.Mesh(new THREE.LatheGeometry(halfPts, 48, Math.PI / 2, Math.PI), cellMat); halfCell.scale.setScalar(RR);
+  const capMat = new THREE.MeshPhysicalMaterial({ color: '#C2363C', roughness: 0.55, sheen: 0.6, sheenColor: col('#FFB0A8'), side: THREE.DoubleSide });
+  const section = new THREE.Mesh(new THREE.ShapeGeometry(rbcProfileShape(RR), 1), capMat); section.position.z = 0.002;
+  // haemoglobin: the cut face is packed with tiny molecules
+  const hbN = 520, hb = new THREE.InstancedMesh(new THREE.SphereGeometry(0.045, 8, 6), new THREE.MeshStandardMaterial({ color: '#6E0F18', roughness: 0.5 }), hbN);
+  { const Rh = rng(5), h = x => 0.5 * Math.sqrt(Math.max(0, 1 - x * x)) * (0.207 + 2.003 * x * x - 1.123 * x ** 4); let i = 0;
+    while (i < hbN) { const x = Rh() * 2 - 1, y = (Rh() * 2 - 1) * 0.35; if (Math.abs(y) < h(Math.abs(x)) * 0.92) { _m.makeTranslation(x * RR, y * RR, 0.03); hb.setMatrixAt(i++, _m); } } }
+  hb.frustumCulled = false;
+  const cellGroup = new THREE.Group(); cellGroup.add(fullCell, halfCell, section, hb); stC.add(cellGroup);
+  cellGroup.rotation.x = 0.36;
+  const setCut = on => { fullCell.visible = !on; halfCell.visible = section.visible = hb.visible = on; };
+  setCut(true);
+  ch.glow.add('cell', cellMat);
+
+  // ================= D: one red blood cell going round: lungs -> heart -> body -> heart -> lungs (one way only)
+  const stD = new THREE.Group(); G.add(stD);
+  const o2Geo = (() => { const a = new THREE.SphereGeometry(0.15, 14, 10); a.translate(-0.1, 0, 0); const b = new THREE.SphereGeometry(0.15, 14, 10); b.translate(0.1, 0, 0);
+    const g = new THREE.BufferGeometry(); const pa = a.attributes.position.array, pb = b.attributes.position.array, na = a.attributes.normal.array, nb = b.attributes.normal.array;
+    g.setAttribute('position', new THREE.Float32BufferAttribute([...pa, ...pb], 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute([...na, ...nb], 3));
+    const ia = [...a.index.array], off = a.attributes.position.count; g.setIndex([...ia, ...b.index.array].map((v, k) => (k < ia.length ? v : v + off))); return g; })();
+  // the places
+  const BOXX = 6.4;
+  const lungBox = new THREE.Mesh(new RoundedBoxGeometry(4.6, 5.2, 3.0, 6, 1.3), glass('#F5A9B0', { opacity: 0.4, base: 0.24, power: 1.5 })); lungBox.position.set(-BOXX, 0, -0.4); stD.add(lungBox);
+  const bodyBox = new THREE.Mesh(new RoundedBoxGeometry(4.6, 5.2, 3.0, 6, 1.3), glass('#E8B4A2', { opacity: 0.32, base: 0.2, power: 1.5 })); bodyBox.position.set(BOXX, 0, -0.4); stD.add(bodyBox);
+  const tcMat = tissue(C.tissue, { roughness: 0.55, clearcoat: 0.3 });
+  const tCells = [];
+  for (const [x, y, z] of [[5.6, -1.65, -0.9], [7.2, -1.55, -0.8], [5.7, 1.7, -0.9], [7.25, 1.6, -0.8], [7.6, 0.05, -1.0]]) {
+    const m = new THREE.Mesh(new RoundedBoxGeometry(1.15, 1.0, 1.05, 3, 0.3), tcMat); m.position.set(x, y, z); stD.add(m); tCells.push(m);
+    const n = new THREE.Mesh(new THREE.SphereGeometry(0.2, 14, 10), tissue(C.nucleus)); n.position.set(x, y, z + 0.45); stD.add(n);
+  }
+  // a simple heart in the middle: both routes pass through it
+  const heartShape = new THREE.Shape(); heartShape.moveTo(0, -1.25); heartShape.bezierCurveTo(-0.3, -0.95, -1.3, -0.3, -1.3, 0.35); heartShape.bezierCurveTo(-1.3, 1.0, -0.65, 1.3, -0.3, 1.05);
+  heartShape.bezierCurveTo(-0.12, 0.92, 0, 0.75, 0, 0.62); heartShape.bezierCurveTo(0, 0.75, 0.12, 0.92, 0.3, 1.05); heartShape.bezierCurveTo(0.65, 1.3, 1.3, 1.0, 1.3, 0.35);
+  heartShape.bezierCurveTo(1.3, -0.3, 0.3, -0.95, 0, -1.25);
+  const heartIcon = new THREE.Mesh(new THREE.ExtrudeGeometry(heartShape, { depth: 0.5, bevelEnabled: true, bevelThickness: 0.25, bevelSize: 0.2, bevelSegments: 4, curveSegments: 24 }), tissue(C.muscle, { roughness: 0.4, clearcoat: 0.7 }));
+  heartIcon.scale.setScalar(1.25); heartIcon.position.set(0, 0.15, -1.1); stD.add(heartIcon);
+  // the loop: top edge lungs -> heart -> body (rich in oxygen), bottom edge body -> heart -> lungs (low in oxygen)
+  const loopPts = [V3(-5.4, 1.35, 0.3), V3(-2.6, 1.35, 0.3), V3(0, 1.0, 0.3), V3(2.6, 1.35, 0.3), V3(5.4, 1.35, 0.3), V3(7.6, 1.0, 0.3), V3(8.0, 0, 0.3), V3(7.6, -1.0, 0.3),
+    V3(5.4, -1.35, 0.3), V3(2.6, -1.35, 0.3), V3(0, -0.7, 0.3), V3(-2.6, -1.35, 0.3), V3(-5.4, -1.35, 0.3), V3(-7.6, -1.0, 0.3), V3(-8.0, 0, 0.3), V3(-7.6, 1.0, 0.3)];
+  const loop = new THREE.CatmullRomCurve3(loopPts, true, 'centripetal');
+  const loopGeo = new THREE.TubeGeometry(loop, 220, 0.62, 18, true);
+  const cO = col(C.oxy), cD = col(C.deoxy), tc = new THREE.Color();
+  const oxyAt = u => { const p = loop.getPointAt(u); if (p.x < -4) return sstep(0.5, -0.5, p.y); if (p.x > 4) return sstep(-0.5, 0.5, p.y); return p.y > 0 ? 1 : 0; };
+  tubeColors(loopGeo, u => tc.lerpColors(cD, cO, oxyAt(u)).clone());
+  const loopMesh = new THREE.Mesh(loopGeo, new THREE.MeshPhysicalMaterial({ vertexColors: true, transparent: true, opacity: 0.32, roughness: 0.25, clearcoat: 1, depthWrite: false }));
+  stD.add(loopMesh);
+  // chevrons on the loop
+  const chev = new THREE.ConeGeometry(0.26, 0.55, 18); chev.translate(0, 0.27, 0);
+  for (const u of [0.05, 0.2, 0.55, 0.7]) {
+    const m = new THREE.Mesh(chev, tissue(oxyAt(u) > 0.5 ? C.oxy : C.deoxy, { roughness: 0.35, clearcoat: 0.8 }));
+    m.position.copy(loop.getPointAt(u)); m.quaternion.setFromUnitVectors(V3(0, 1, 0), loop.getTangentAt(u)); stD.add(m);
+  }
+  const shut = new THREE.Mesh(rbcGeometry(48), new THREE.MeshPhysicalMaterial({ color: '#7E1A24', roughness: 0.32, clearcoat: 0.85, sheen: 0.5, sheenColor: col('#FF8080') }));
+  shut.scale.setScalar(0.92); stD.add(shut);
+  // oxygen molecules: white with a dark rim, so they stand out from the red cell
+  const NO = 30;
+  const o2 = new THREE.InstancedMesh(o2Geo, new THREE.MeshStandardMaterial({ color: '#FFFFFF', emissive: col('#FFFFFF'), emissiveIntensity: 0.35, roughness: 0.35 }), NO);
+  const o2rim = new THREE.InstancedMesh(o2Geo, new THREE.MeshBasicMaterial({ color: '#141D36', side: THREE.BackSide }), NO);
+  o2.frustumCulled = o2rim.frustumCulled = false; stD.add(o2rim, o2);
+  const Ro = rng(8), SLOTS = 12;
+  const slotPos = i => { const a = (i / SLOTS) * TAU; return V3(Math.cos(a) * 0.62, 0.2 * (i % 2 ? 1 : -1), Math.sin(a) * 0.62); };
+  const inLung = () => V3(-BOXX + (Ro() - 0.5) * 3.4, (Ro() - 0.5) * 4.0, -0.4 + (Ro() - 0.5) * 2.0);
+  const mols = Array.from({ length: NO }, (_, i) => ({ i, state: 'free', p: inLung(), v: V3(Ro() - 0.5, Ro() - 0.5, Ro() - 0.5).multiplyScalar(0.5), slot: -1, t: 0, from: V3(), to: V3(), a: Ro() * TAU }));
+  const shuttle = { u: 0.86, load: 0, onChange: null, slots: Array(SLOTS).fill(null), last: '' };
+  const cDark = col('#7E1A24'), cBright = col('#E8443C');
+  const _w = V3(), _rs = V3();
+  const zoneOf = p => (p.x < -4.2 ? 'lungs' : p.x > 4.2 ? 'body' : p.y > 0 ? 'toBody' : 'toLungs');
+  function updateShuttle(dt, time) {
+    loop.getPointAt(shuttle.u, shut.position);
+    const zone = zoneOf(shut.position);
+    const speed = zone === 'lungs' || zone === 'body' ? 0.022 : 0.055;    // slow down where the swapping happens
+    shuttle.u = (shuttle.u + speed * dt) % 1;
+    shut.rotation.set(Math.PI / 2 - 0.3, time * 0.5, 0);
+    if (zone === 'lungs') {
+      for (let k = 0; k < SLOTS; k++) if (!shuttle.slots[k] && Ro() < dt * 3.2) {
+        let best = null, bd = 1e9; for (const m of mols) if (m.state === 'free') { const d = m.p.distanceToSquared(shut.position); if (d < bd) { bd = d; best = m; } }
+        if (best) { best.state = 'in'; best.slot = k; best.t = 0; best.from.copy(best.p); shuttle.slots[k] = best; }
+      }
+    }
+    if (zone === 'body') {
+      for (let k = 0; k < SLOTS; k++) { const m = shuttle.slots[k]; if (m && m.state === 'bound' && Ro() < dt * 2.0) {
+        m.state = 'out'; m.t = 0; m.from.copy(m.p); const c = tCells[Math.floor(Ro() * tCells.length)]; m.to.copy(c.position).add(V3((Ro() - 0.5) * 0.5, (Ro() - 0.5) * 0.4, 0.35)); shuttle.slots[k] = null; } }
+    }
+    let load = 0;
+    for (const m of mols) {
+      if (m.state === 'free') {
+        m.p.addScaledVector(m.v, dt);
+        for (const ax of ['x', 'y', 'z']) { const lo = { x: -BOXX - 1.8, y: -2.2, z: -1.4 }[ax], hi = { x: -BOXX + 1.8, y: 2.2, z: 0.6 }[ax]; if (m.p[ax] < lo || m.p[ax] > hi) { m.v[ax] *= -1; m.p[ax] = clamp(m.p[ax], lo, hi); } }
+      } else if (m.state === 'in') {
+        m.t += dt / 0.7; _w.copy(slotPos(m.slot)).applyQuaternion(shut.quaternion).multiplyScalar(0.92).add(shut.position);
+        m.p.lerpVectors(m.from, _w, easeIO(Math.min(1, m.t))); if (m.t >= 1) m.state = 'bound';
+      } else if (m.state === 'bound') {
+        m.p.copy(slotPos(m.slot)).applyQuaternion(shut.quaternion).multiplyScalar(0.92).add(shut.position); load++;
+      } else if (m.state === 'out') {
+        m.t += dt / 1.1; m.p.lerpVectors(m.from, m.to, easeIO(Math.min(1, m.t)));
+        if (m.t >= 1) { m.state = 'free'; m.p.copy(inLung()); m.slot = -1; }   // used by the cell; fresh oxygen keeps arriving in the lungs
+      }
+      m.a += dt * 1.5;
+      const hidden = m.state === 'out' && m.t > 0.92;
+      _q.setFromEuler(new THREE.Euler(m.a, m.a * 0.6, 0));
+      _m.compose(m.p, _q, _s.setScalar(hidden ? 0.001 : 1)); o2.setMatrixAt(m.i, _m);
+      _m.compose(m.p, _q, _rs.setScalar(hidden ? 0.001 : 1.22)); o2rim.setMatrixAt(m.i, _m);
+    }
+    o2.instanceMatrix.needsUpdate = true; o2rim.instanceMatrix.needsUpdate = true;
+    shuttle.load += (load - shuttle.load) * (1 - Math.exp(-dt * 6));
+    shut.material.color.lerpColors(cDark, cBright, shuttle.load / SLOTS);
+    if (shuttle.onChange) shuttle.onChange(zone, load, SLOTS);
+  }
+  L(stD, 'zLung', 'In the lungs', V3(-BOXX, 2.75, -0.4), { tone: 'side nodot', dx: 0, dy: -14, sub: 'lots of oxygen' });
+  L(stD, 'zBody', 'In the body', V3(BOXX, 2.75, -0.4), { tone: 'side nodot', dx: 0, dy: -14, sub: 'cells using up oxygen' });
+  L(stD, 'zO2', 'oxygen', V3(-BOXX - 1.2, -1.6, 0.3), { dx: -36, dy: 60 });
+  L(stD, 'zCell', 'body cells', V3(7.2, -1.55, 0), { dx: 40, dy: 60 });
+  L(stD, 'zHeart', 'heart', V3(0, 1.5, -0.6), { dx: 0, dy: -60, sub: 'pumps the blood round' });
+  const shutLabel = label('red blood cell', { tone: 'follow nodot', dx: 0, dy: -50 }); stD.add(shutLabel); ch.labels.zRbc = shutLabel;
+
+  // labels ride on the cell itself (cell axis = y, cut face = the z = 0 plane)
+  L(cellGroup, 'cNuc', 'no nucleus', V3(0.1, 0, 0.04), { dx: 70, dy: -150, sub: 'more room for haemoglobin' });
+  L(cellGroup, 'cDent', 'dented on both sides', V3(-0.6, 0.34, 0.04), { dx: -130, dy: -120, sub: 'a large surface area: oxygen diffuses in and out fast' });
+  L(cellGroup, 'cHb', 'packed with haemoglobin', V3(-0.66 * RR, 0, 0.05), { dx: -40, dy: 110, sub: 'the red protein that carries oxygen' });
+  L(cellGroup, 'cSize', 'small and flexible', V3(RR * 0.97, -0.05, -0.5), { dx: 40, dy: 110, sub: 'squeezes through the narrowest capillaries' });
+
+  // ================= chapter wiring
+  let stage = 'A';
+  function show(s) { stage = s; stA.visible = s === 'A'; stB.visible = s === 'B'; stC.visible = s === 'C'; stD.visible = s === 'D'; scene.fog = s === 'B' ? new THREE.Fog('#F4D9A0', 20, 50) : null; }
+  show('A');
+  ch.update = (dt, time) => {
+    if (stage === 'A') updateSpin(dt);
+    if (stage === 'B') updateDrop(dt, time);
+    if (stage === 'C') cellGroup.position.y = Math.sin(time * 0.8) * 0.06;
+    if (stage === 'D') { updateShuttle(dt, time); shutLabel.position.copy(shut.position); }
+  };
+  ch.exit = () => { scene.fog = null; };
+  function partsCtl(el) {
+    el.innerHTML = `<div class="seg" role="group" aria-label="Parts of the blood">${Object.entries(PARTS).map(([k, v]) => `<button data-k="${k}" aria-pressed="false">${v[1].replace('blood cells', 'cells')}</button>`).join('')}</div><div id="partInfo"></div>`;
+    const info = el.querySelector('#partInfo');
+    const pick = k => {
+      const [c, n, d] = PARTS[k];
+      info.innerHTML = `<div class="info"><i class="sw" style="background:${c}"></i><div><b>${n}</b><p>${d}</p></div></div>`;
+      el.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === k));
+      ch.glow.set([k === 'plasma' ? '' : k]);
+      for (const [pk, lk] of Object.entries(PART_LABEL)) ch.labels[lk]?.userData.el.classList.toggle('follow', pk === k);
+    };
+    el.querySelectorAll('.seg button').forEach(b => (b.onclick = () => pick(b.dataset.k)));
+    ch.onPick = k => { if (PARTS[k]) pick(k); };
+    pick('rbc');
+    return () => { ch.onPick = null; };
+  }
+  ch.steps = [
+    {
+      title: 'What is blood made of?',
+      text: 'Spin a tube of blood very fast and it separates into layers. More than half is a yellow liquid, <b>plasma</b>. The rest is cells.',
+      cam: { t: [0, 1.3, 0.4], dir: [0.12, 0.42, 1], w: 9.5, h: 7.2 }, labels: [], focus: ['tube'],
+      enter: () => { show('A'); startSpin(); },
+      ctl: el => { el.innerHTML = '<div class="row"><button class="btn small" id="respin">Spin it again</button></div>'; el.querySelector('#respin').onclick = () => startSpin(true); },
+    },
+    {
+      title: 'Zoom into one drop',
+      text: 'In one drop of blood: <span class="t-oxy">red blood cells</span>, white blood cells and platelets, all floating in plasma. Tap a part, here or on the model, to see its job.',
+      cam: { t: [0, 0.2, 0], dir: [0, 0.06, 1], w: 13.5, h: 7.2 }, labels: ['dRbc', 'dWbc', 'dPlat', 'dPlasma'], focus: [],
+      enter: () => show('B'), ctl: partsCtl, pickAny: () => [heroRBC, ...heroPlats, wbcs[0].children[0]],
+    },
+    {
+      title: 'Red blood cells: built to carry oxygen',
+      text: 'Here is one red blood cell, cut in half. Every feature helps it carry more oxygen, or carry it faster.',
+      cam: { t: [0, 0.2, 0], dir: [0.22, 0.4, 1], w: 11.5, h: 8.2 }, labels: ['cNuc', 'cDent', 'cHb', 'cSize'], focus: [],
+      enter: () => { show('C'); setCut(true); },
+      ctl: el => {
+        el.innerHTML = '<div class="seg" role="group" aria-label="View"><button aria-pressed="true" data-v="cut">Cut in half</button><button aria-pressed="false" data-v="whole">Whole cell</button></div>';
+        el.querySelectorAll('button').forEach(b => (b.onclick = () => { setCut(b.dataset.v === 'cut'); el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); }));
+      },
+    },
+    {
+      title: 'Picking oxygen up, letting it go',
+      text: 'Watch one red blood cell go round. In the lungs, <b>oxygen</b> (white) joins its haemoglobin to make <b>oxyhaemoglobin</b>, and the cell turns bright red. In the body, where oxygen is low, it lets the oxygen go.',
+      cam: { t: [0, 0.4, 0], dir: [0.05, 0.22, 1], w: 18.5, h: 7.6 }, labels: ['zLung', 'zBody', 'zO2', 'zCell', 'zRbc', 'zHeart'], focus: [],
+      enter: () => { show('D'); shuttle.u = 0.86; },
+      ctl: el => {
+        el.innerHTML = '<div class="meter"><b id="oxN">0 of 12</b><span id="oxT">In the lungs: picking up oxygen</span><div class="bar"><i id="oxBar" style="background:var(--oxy);width:0%"></i></div></div><p class="mini">The number is how many oxygen molecules this cell is carrying. &nbsp;oxygen + haemoglobin → oxyhaemoglobin</p>';
+        const T = { lungs: 'In the lungs: picking up oxygen', toBody: 'Through the heart, out to the body', body: 'In the body: letting oxygen go', toLungs: 'Through the heart, back to the lungs' };
+        shuttle.onChange = (k, n, max) => {
+          if (k !== shuttle.last) { el.querySelector('#oxT').textContent = T[k]; shuttle.last = k; }
+          el.querySelector('#oxN').textContent = `${n} of ${max}`; el.querySelector('#oxBar').style.width = `${(100 * n / max).toFixed(0)}%`;
+        };
+        return () => { shuttle.onChange = null; shuttle.last = ''; };
+      },
+    },
+    {
+      title: 'Quick check',
+      text: 'Tap the cell that <b>destroys pathogens</b>.',
+      cam: { t: [0, 0.2, 0], dir: [0, 0.06, 1], w: 13.5, h: 7.2 }, labels: [], focus: [],
+      enter: () => show('B'),
+      check: { answer: 'wbc', pickFn: () => [heroRBC, ...heroPlats, wbcs[0].children[0]],
+        yes: 'Yes: a <b>white blood cell</b>. Some engulf pathogens, others make antibodies against them.',
+        no: 'Pathogens are destroyed by <b>white blood cells</b>: the big pale cell with a purple nucleus.' },
+      labelsAfter: ['dWbc'],
+    },
+  ];
+  return ch;
+}
+
+// ============================================================== chapter 3: blood vessels
+function chVessels() {
+  const ch = { id: 'vessels', name: 'Vessels', group: new THREE.Group(), glow: new Glow(), legend: 'blood', labels: {} };
+  const G = ch.group;
+  const U = { uT: { value: 0 }, uAmp: { value: 0.09 }, uLam: { value: 6 }, uC: { value: 6 }, uSq: { value: 0 } };
+  const pulseify = m => {
+    m.onBeforeCompile = sh => {
+      Object.assign(sh.uniforms, { uT: U.uT, uAmp: U.uAmp, uLam: U.uLam, uC: U.uC });
+      sh.vertexShader = 'uniform float uT; uniform float uAmp; uniform float uLam; uniform float uC;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+        { float ph = (transformed.x - uC * uT) / uLam; float fr = ph - floor(ph); float w = exp(-pow((fr - 0.5) * uLam / 1.1, 2.0));
+          float taper = 1.0 - smoothstep(-5.6, -4.2, transformed.x); transformed.yz *= 1.0 + uAmp * w * taper; }`);
+    };
+    m.customProgramCacheKey = () => 'pulse'; m.side = THREE.DoubleSide; return m;
+  };
+  const squeezify = m => {
+    m.onBeforeCompile = sh => {
+      sh.uniforms.uSq = U.uSq;
+      sh.vertexShader = 'uniform float uSq;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+        { float k = smoothstep(8.3, 9.3, transformed.x) * (1.0 - smoothstep(12.0, 13.0, transformed.x)); transformed.yz *= 1.0 - uSq * 0.3 * k; }`);
+    };
+    m.customProgramCacheKey = () => 'squeeze'; m.side = THREE.DoubleSide; return m;
+  };
+  const pulseW = (x, t) => { const ph = (x - U.uC.value * t) / U.uLam.value, fr = ph - Math.floor(ph); return Math.exp(-((((fr - 0.5) * U.uLam.value) / 1.1) ** 2)); };
+
+  // ---- the vessels, cut open towards the viewer
+  const X = { a0: -15, a1: -5.4, c0: -3.6, c1: 3.6, v0: 5.4, v1: 15 };
+  const add = (geo, mat) => { const m = new THREE.Mesh(geo, mat); G.add(m); return m; };
+  const mm = (c, o = {}) => tissue(c, Object.assign({ roughness: 0.55, clearcoat: 0.25, sheen: 0.4 }, o));
+  // artery: lining, muscle with three elastic layers, outer coat
+  const aMus = pulseify(mm('#D9675F')), aEla = pulseify(mm(C.elastic, { roughness: 0.4 })), aLin = pulseify(mm(C.lining)), aCoat = pulseify(mm(C.coat));
+  const aLayers = [[0.48, 0.56, aLin], [0.56, 0.7, aMus], [0.7, 0.74, aEla], [0.74, 0.85, aMus], [0.85, 0.89, aEla], [0.89, 1.0, aMus], [1.0, 1.04, aEla], [1.04, 1.13, aMus], [1.13, 1.28, aCoat]];
+  for (const [ri, ro, m] of aLayers) add(halfShell(ri, ro, X.a0, X.a1), m);
+  // arteriole and venule tapers
+  const tapIn = x => lerp(0.48, 0.2, sstep(X.a1, X.c0, x)), tapOut = x => lerp(1.28, 0.27, sstep(X.a1, X.c0, x));
+  add(halfShell(tapIn, tapOut, X.a1, X.c0, 30), pulseify(mm('#E08A80')));
+  const vtIn = x => lerp(0.2, 1.04, sstep(X.c1, X.v0, x)), vtOut = x => lerp(0.27, 1.28, sstep(X.c1, X.v0, x));
+  add(halfShell(vtIn, vtOut, X.c1, X.v0, 30), mm('#B9A9D8'));
+  // capillary: a wall one cell thick (flat cells, each with a nucleus)
+  const capMat = mm('#F6D2CB', { roughness: 0.5 });
+  add(halfShell(0.2, 0.27, X.c0, X.c1, 60), capMat);
+  const endoN = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 12, 8), mm('#B07ACB'), 18); endoN.frustumCulled = false;
+  { let i = 0; for (let k = 0; k < 9; k++) for (const th of [0.45, 2.6]) { const x = X.c0 + 0.45 + k * 0.8 + (th > 1 ? 0.4 : 0); const m = new THREE.Matrix4().compose(V3(x, Math.cos(th) * 0.27, -Math.sin(th) * 0.27), new THREE.Quaternion(), V3(0.16, 0.04, 0.09)); endoN.setMatrixAt(i++, m); } }
+  G.add(endoN);
+  // vein: thin wall, wide lumen
+  const vMus = squeezify(mm('#C59AA6')), vLin = squeezify(mm('#EEE6F7')), vCoat = squeezify(mm(C.coat));
+  for (const [ri, ro, m] of [[1.04, 1.08, vLin], [1.08, 1.17, vMus], [1.17, 1.28, vCoat]]) add(halfShell(ri, ro, X.v0, X.v1), m);
+  ch.glow.add('artery', aMus, aCoat); ch.glow.add('vein', vMus, vCoat); ch.glow.add('cap', capMat);
+  // valves in the vein: two flaps each, pointing towards the heart
+  const valveMat = tissue('#8C6BC2', { roughness: 0.45, side: THREE.DoubleSide, sheen: 0.6 });
+  const flap = new THREE.BoxGeometry(1.02, 0.15, 1.7); flap.translate(0.51, 0, -0.85);
+  const valves = [];
+  for (const vx of [7.4, 13.8]) {
+    for (const s of [1, -1]) { const piv = new THREE.Group(); piv.position.set(vx, s * 1.03, 0); const m = new THREE.Mesh(flap, valveMat); piv.add(m); G.add(piv); valves.push({ piv, s, x: vx, a: 0.3 }); }
+  }
+  ch.glow.add('valve', valveMat);
+  // skeletal muscles that squeeze the vein
+  const legMat = tissue('#C8574F', { roughness: 0.6, clearcoat: 0.2 });
+  const legs = [];
+  for (const s of [1, -1]) { const m = new THREE.Mesh(new RoundedBoxGeometry(4.6, 0.95, 2.2, 3, 0.4), legMat); m.position.set(10.65, s * 1.86, -0.6); G.add(m); legs.push(m); }
+  ch.glow.add('legs', legMat);
+  const showLegs = on => { for (const l of legs) l.visible = on; };
+  showLegs(false);
+  // body cells around the capillary
+  const tissueMat = tissue(C.tissue, { roughness: 0.6, clearcoat: 0.2, transparent: true, opacity: 0.92 });
+  const tcells = [];
+  for (let k = 0; k < 7; k++) for (const [y, z] of [[0.85, -0.35], [-0.85, -0.35], [0, -1.05]]) {
+    const x = X.c0 + 0.5 + k * 1.03 + (z < -0.6 ? 0.5 : 0); if (x > X.c1 - 0.3) continue;
+    const g = new THREE.Group(); g.position.set(x, y, z);
+    g.add(new THREE.Mesh(new RoundedBoxGeometry(0.92, 0.78, 0.86, 2, 0.22), tissueMat));
+    const n = new THREE.Mesh(new THREE.SphereGeometry(0.17, 12, 10), mm(C.nucleus)); n.position.z = 0.15; g.add(n);
+    G.add(g); tcells.push(g);
+  }
+  ch.glow.add('tcells', tissueMat);
+  // stub branches: this capillary is one of many
+  const stubMat = glass('#E9A9A2', { opacity: 0.45 }), stubMatV = glass('#B4B0E8', { opacity: 0.45 });
+  for (const [x0, s, m] of [[-4.6, 1, stubMat], [-4.6, -1, stubMat], [4.6, 1, stubMatV], [4.6, -1, stubMatV]]) {
+    const c = new THREE.CatmullRomCurve3([V3(x0, 0, -0.2), V3(x0 + (x0 < 0 ? 0.8 : -0.8), s * 0.9, -0.9), V3(x0 + (x0 < 0 ? 1.4 : -1.4), s * 1.5, -1.6)]);
+    add(new THREE.TubeGeometry(c, 16, 0.12, 8), m);
+  }
+  // a small heart where the artery starts, and the way back
+  const mini = heartModel(); mini.group.scale.setScalar(0.034); mini.group.position.set(-17.2, 0, -0.2); G.add(mini.group);
+  const lead = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V3(-16.1, 0.9, -0.2), V3(-15.6, 0.4, -0.2), V3(-15, 0, -0.2)]), 12, 0.32, 12), mini.mats.vesL); G.add(lead);
+  const back = new THREE.CatmullRomCurve3([V3(15.2, 0, -0.6), V3(16.6, 1.4, -1.5), V3(15, 5.6, -3), V3(0, 6.6, -4), V3(-15, 5.6, -3), V3(-17.6, 2.2, -1.2), V3(-17.3, 1.4, -0.4)]);
+  const backLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(back.getPoints(120)), new THREE.LineDashedMaterial({ color: col(C.deoxy), dashSize: 0.35, gapSize: 0.25, transparent: true, opacity: 0.55 }));
+  backLine.computeLineDistances(); G.add(backLine);
+
+  // ---- blood cells flowing artery -> capillary -> vein
+  const rIn = x => (x < X.a1 ? 0.48 : x < X.c0 ? tapIn(x) : x < X.c1 ? 0.2 : x < X.v0 ? vtIn(x) : 1.04);
+  const N = 170, Rc = rng(3), cells = [];
+  const cellsMesh = new THREE.InstancedMesh(rbcGeometry(), new THREE.MeshPhysicalMaterial({ roughness: 0.36, clearcoat: 0.7, sheen: 0.3 }), N);
+  cellsMesh.frustumCulled = false; G.add(cellsMesh);
+  for (let i = 0; i < N; i++) {
+    const main = i < 14;
+    cells.push({ main, x: main ? lerp(X.a0, X.v1, i / 14) : lerp(X.a0, X.v1, Rc()), oy: Rc() * 2 - 1, oz: Rc(), ax: V3(Rc() - 0.5, Rc() - 0.5, Rc() - 0.5).normalize(), a: Rc() * TAU, s: 1, j: 0.85 + Rc() * 0.3 });
+    if (!main && cells[i].x > X.a1 - 0.2 && cells[i].x < X.v0) cells[i].x = Rc() < 0.5 ? X.a0 + Rc() * 9 : X.v0 + Rc() * 9;
+  }
+  const cO = col(C.oxy), cD = col(C.deoxy), _c = new THREE.Color(), _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _p = V3(), _s = V3();
+  const st = { t: 0, sq: 0, sqT: 0, period: 1.0, squeezeNow: false };
+  function updateCells(dt) {
+    for (let i = 0; i < N; i++) {
+      const c = cells[i];
+      let v;
+      if (c.x < X.a1) v = 0.9 + 4.2 * pulseW(c.x, st.t);
+      else if (c.x < X.c1) v = c.main ? 0.75 : 1.6;
+      else if (c.x < X.v0) v = 0.8;
+      else {
+        v = 0.5;
+        if (c.x > 7.4) v += 2.6 * st.sq;           // squeezed blood is pushed towards the heart
+        else v *= 1 - 0.9 * st.sq;                 // the closed valve holds the blood behind it
+      }
+      c.x += v * c.j * dt;
+      // most cells go into other capillaries (not shown) and new ones join from them
+      if (!c.main && c.x > X.a1 - 0.4 && c.x < X.v0) { c.x = X.v0 + 0.05; c.s = 0; }
+      if (c.x > X.v1) { c.x = X.a0; c.s = 0; }
+      c.s = Math.min(1, c.s + dt * 1.8);
+      const r = rIn(c.x), spread = Math.max(0, r - 0.2);
+      _p.set(c.x, c.oy * spread * 0.85, -0.05 - c.oz * spread * 0.85);
+      if (c.x > 8.3 && c.x < 13) _p.y *= 1 - 0.3 * st.sq;
+      const cap = c.x > X.c0 - 0.3 && c.x < X.c1 + 0.3;
+      c.a += dt * (cap ? 0.2 : 0.9);
+      _q.setFromAxisAngle(c.ax, c.a);
+      if (cap) _q.setFromEuler(new THREE.Euler(0, 0, Math.PI / 2));
+      const sz = (cap ? 0.16 : 0.2) * c.s; _s.set(sz, sz, sz);
+      _m.compose(_p, _q, _s); cellsMesh.setMatrixAt(i, _m);
+      _c.lerpColors(cO, cD, sstep(-2.2, 2.4, c.x)); cellsMesh.setColorAt(i, _c);
+    }
+    cellsMesh.instanceMatrix.needsUpdate = true; cellsMesh.instanceColor.needsUpdate = true;
+  }
+  for (let i = 0; i < N; i++) cellsMesh.setColorAt(i, cO);
+
+  // ---- substances diffusing between the capillary and the cells
+  const NO = 34, NC = 26, NG = 14, NT = NO + NC + NG;
+  const dots = new THREE.InstancedMesh(new THREE.SphereGeometry(0.1, 12, 10), new THREE.MeshPhysicalMaterial({ roughness: 0.3, clearcoat: 1, emissive: col('#ffffff'), emissiveIntensity: 0.12 }), NT);
+  dots.frustumCulled = false; G.add(dots);
+  const Rd = rng(9), mol = [];
+  const kinds = [...Array(NO).fill('o2'), ...Array(NC).fill('co2'), ...Array(NG).fill('glu')];
+  const colK = { o2: col('#FF4A3D'), co2: col('#7D86A6'), glu: col('#F5B21E') };
+  const respawn = m => {
+    const cell = tcells[Math.floor(Rd() * tcells.length)];
+    const inCap = V3(lerp(X.c0 + 0.4, X.c1 - 0.4, Rd()), (Rd() - 0.5) * 0.12, -0.06);
+    const inCell = cell.position.clone().add(V3((Rd() - 0.5) * 0.5, (Rd() - 0.5) * 0.4, (Rd() - 0.5) * 0.3 + 0.1));
+    inCap.x = clamp(cell.position.x + (Rd() - 0.5) * 0.6, X.c0 + 0.3, X.c1 - 0.3);
+    if (m.k === 'co2') { m.a = inCell; m.b = inCap; } else { m.a = inCap; m.b = inCell; }
+    m.t = 0; m.d = 1.6 + Rd() * 1.4;
+  };
+  kinds.forEach((k, i) => { const m = { k, i }; respawn(m); m.t = Rd(); mol.push(m); dots.setColorAt(i, colK[k]); });
+  function updateDots(dt) {
+    for (const m of mol) {
+      m.t += dt / m.d; if (m.t >= 1) respawn(m);
+      const e = easeIO(m.t); _p.lerpVectors(m.a, m.b, e); _p.y += Math.sin(m.t * Math.PI) * 0.05;
+      const s = Math.sin(Math.PI * Math.min(1, m.t * 1.15)) > 0.05 ? 1 : 0.2;
+      _m.compose(_p, _q.identity(), _s.set(s, s, s)); dots.setMatrixAt(m.i, _m);
+    }
+    dots.instanceMatrix.needsUpdate = true;
+  }
+
+  // ---- blood pressure along the way (a live graph floating above the vessels)
+  const NPRS = 260, prPos = new Float32Array(NPRS * 3);
+  const prGeo = new THREE.BufferGeometry(); prGeo.setAttribute('position', new THREE.BufferAttribute(prPos, 3));
+  const prLine = new THREE.Line(prGeo, new THREE.LineBasicMaterial({ color: col('#47526F'), transparent: true, opacity: 0.95 }));
+  const prFill = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ visible: false }));
+  const prBase = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(-15, 1.9, -0.6), V3(15, 1.9, -0.6)]), new THREE.LineBasicMaterial({ color: '#8C94B0', transparent: true, opacity: 0.6 }));
+  const prGroup = new THREE.Group(); prGroup.add(prLine, prBase, prFill); G.add(prGroup);
+  // a thicker ribbon so the line reads at any size
+  const ribbon = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: col('#47526F'), side: THREE.DoubleSide, transparent: true, opacity: 0.9 }));
+  const ribPos = new Float32Array(NPRS * 2 * 3), ribIdx = [];
+  for (let i = 0; i < NPRS - 1; i++) { const a = i * 2; ribIdx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  ribbon.geometry.setAttribute('position', new THREE.BufferAttribute(ribPos, 3)); ribbon.geometry.setIndex(ribIdx); prGroup.add(ribbon);
+  const pressure = (x, t) => {
+    if (x < X.a1) return 82 + 36 * pulseW(x, t) - (x - X.a0) * 0.4;
+    if (x < X.c0) { const k = sstep(X.a1, X.c0, x); return lerp(80 + 30 * pulseW(x, t) * (1 - k), 36, k); }
+    if (x < X.c1) return lerp(36, 16, (x - X.c0) / (X.c1 - X.c0));
+    if (x < X.v0) return lerp(16, 10, (x - X.c1) / (X.v0 - X.c1));
+    return lerp(10, 4, (x - X.v0) / (X.v1 - X.v0));
+  };
+  function updatePressure() {
+    for (let i = 0; i < NPRS; i++) {
+      const x = lerp(-15, 15, i / (NPRS - 1)), y = 1.9 + pressure(x, st.t) * 0.022;
+      prPos[i * 3] = x; prPos[i * 3 + 1] = y; prPos[i * 3 + 2] = -0.6;
+      ribPos[i * 6] = x; ribPos[i * 6 + 1] = y - 0.045; ribPos[i * 6 + 2] = -0.6; ribPos[i * 6 + 3] = x; ribPos[i * 6 + 4] = y + 0.045; ribPos[i * 6 + 5] = -0.6;
+    }
+    prGeo.attributes.position.needsUpdate = true; ribbon.geometry.attributes.position.needsUpdate = true; ribbon.geometry.computeBoundingSphere();
+  }
+
+  // ---- labels
+  const Lb = (key, text, pos, o) => { const l = label(text, o); l.position.copy(pos); G.add(l); ch.labels[key] = l; };
+  Lb('artery', 'artery', V3(-10.2, -1.28, 0), { dx: 0, dy: 44, sub: 'carries blood away from the heart' });
+  Lb('capillary', 'capillary', V3(0, -0.27, 0), { dx: 0, dy: 58, sub: 'passes close to every cell' });
+  Lb('vein', 'vein', V3(10.2, -1.28, 0), { dx: 0, dy: 44, sub: 'carries blood back to the heart' });
+  Lb('toHeart', 'back to the heart →', V3(15.6, 0, 0), { tone: 'nodot', dx: 0, dy: -46 });
+  Lb('heart', 'heart', V3(-17.2, 1.6, 0), { dx: 0, dy: -36 });
+  Lb('back', 'back to the heart', V3(0, 6.6, -4), { tone: 'deoxy nodot', dx: 0, dy: -4 });
+  Lb('pHigh', 'high pressure, in surges', V3(-10.2, 4.75, -0.6), { tone: 'oxy nodot', dx: 0, dy: -8 });
+  Lb('pFall', 'falling', V3(0, 3.0, -0.6), { tone: 'nodot', dx: 0, dy: -18 });
+  Lb('pLow', 'low pressure', V3(10.2, 2.35, -0.6), { tone: 'deoxy nodot', dx: 0, dy: -18 });
+  Lb('pName', 'blood pressure', V3(-15, 1.9, -0.6), { tone: 'nodot', dx: -70, dy: -14, sub: 'higher line = more pressure' });
+  Lb('aWall', 'thick wall', V3(-9.0, 0.95, 0.02), { tone: 'oxy', dx: -10, dy: -62, sub: 'muscle and stretchy elastic fibres' });
+  Lb('aLumen', 'narrow lumen', V3(-11.6, 0.0, -0.1), { dx: -20, dy: 74, sub: 'the space the blood flows through' });
+  Lb('aPulse', 'each surge stretches the wall: your pulse', V3(-6.6, 1.32, -0.2), { dx: 40, dy: -50 });
+  Lb('vWall', 'thin wall', V3(6.1, 1.13, 0.02), { tone: 'deoxy', dx: -24, dy: -56 });
+  Lb('vLumen', 'wide lumen', V3(6.3, -0.3, -0.3), { dx: -36, dy: 66 });
+  Lb('vValve', 'valve', V3(13.8, -0.6, -0.2), { dx: 40, dy: 74, sub: 'stops blood flowing backwards' });
+  Lb('vMuscle', 'leg muscles squeeze the vein', V3(10.65, 2.3, 0.4), { dx: 0, dy: -38 });
+  Lb('cWall', 'wall one cell thick', V3(-1.6, 0.27, 0.02), { dx: -40, dy: -70, sub: 'a very short distance to diffuse' });
+  Lb('cO2', 'oxygen and glucose: out to the cells ↑', V3(1.2, 0.55, 0.2), { tone: 'oxy', dx: 70, dy: -64 });
+  Lb('cCO2', 'carbon dioxide: into the blood ↑', V3(-0.8, -0.55, 0.2), { tone: 'grey', dx: -30, dy: 70 });
+  // pick hulls
+  const hA = hull(new THREE.BoxGeometry(9.8, 2.8, 2.8), 'artery', G, V3(-10.2, 0, 0)), hC = hull(new THREE.BoxGeometry(7.4, 2.4, 2.4), 'capillary', G, V3(0, 0, 0)), hV = hull(new THREE.BoxGeometry(9.8, 3.4, 2.8), 'vein', G, V3(10.2, 0, 0));
+  hA.visible = hC.visible = hV.visible = false;
+
+  ch.update = (dt, time) => {
+    st.t += dt;
+    U.uT.value = st.t;
+    mini.update(dt, ((st.t / st.period) + 0.45) % 1);
+    // leg muscles squeeze every 3 s (or on demand)
+    st.sqT += dt; if (st.squeezeNow) { st.sqT = 0; st.squeezeNow = false; }
+    const T = st.sqT % 3.0; st.sq = T < 0.55 ? easeIO(T / 0.55) : T < 1.0 ? 1 : T < 1.7 ? 1 - easeIO((T - 1.0) / 0.7) : 0;
+    U.uSq.value = st.sq;
+    for (const l of legs) l.scale.y = 1 + 0.32 * st.sq;
+    legs[0].position.y = 1.86 - 0.2 * st.sq; legs[1].position.y = -1.86 + 0.2 * st.sq;
+    const k = 1 - Math.exp(-dt * 16);
+    for (const v of valves) {
+      const closed = v.x < 10 ? st.sq > 0.25 : st.sq < 0.2 && T > 1.0;
+      const target = closed ? 1.32 : 0.22;
+      v.a += (target - v.a) * k; v.piv.rotation.z = -v.s * v.a;
+    }
+    updateCells(dt); updateDots(dt);
+    if (prGroup.visible) updatePressure();
+  };
+  const showPressure = on => { prGroup.visible = on; backLine.visible = on; };
+  showPressure(false);
+  ch.steps = [
+    {
+      title: 'Three kinds of blood vessel',
+      text: 'Blood leaves the heart in <b>arteries</b>, passes every cell in tiny <b>capillaries</b>, and comes back in <b>veins</b>. Arteries are named by direction (away from the heart), not by oxygen. The grey line shows the blood pressure.',
+      cam: { t: [-1.0, 1.3, 0], dir: [0, 0.14, 1], w: 35.5, h: 9.5 }, labels: ['artery', 'capillary', 'vein', 'heart', 'pHigh', 'pFall', 'pLow', 'pName'], focus: [],
+      enter: () => showPressure(true), exit: () => showPressure(false),
+    },
+    {
+      title: 'Arteries: away from the heart',
+      text: 'Each heartbeat pushes a surge of blood along the artery at <b>high pressure</b>. The thick wall of muscle and stretchy elastic fibres stretches, then springs back. That surge is the pulse you feel at your wrist.',
+      cam: { t: [-9.6, 0.1, 0], dir: [0.22, 0.32, 1], w: 11, h: 5.4 }, labels: ['aWall', 'aLumen', 'aPulse'], focus: ['artery'],
+    },
+    {
+      title: 'Veins: back to the heart',
+      text: 'Blood in veins is at <b>low pressure</b>. When your leg muscles squeeze a vein, the <b>valves</b> let blood go only one way: towards the heart. Watch the flaps snap shut.',
+      cam: { t: [10.8, 0.1, 0], dir: [-0.15, 0.3, 1], w: 12, h: 6.8 }, labels: ['vWall', 'vLumen', 'vValve', 'vMuscle', 'toHeart'], focus: ['valve'],
+      enter: () => showLegs(true), exit: () => showLegs(false),
+      ctl: el => { el.innerHTML = '<div class="row"><button class="btn small" id="sq">Squeeze the muscles now</button></div>'; el.querySelector('#sq').onclick = () => { st.squeezeNow = true; }; },
+    },
+    {
+      title: 'Capillaries: where the swap happens',
+      text: 'A capillary is just wide enough for one red blood cell, and its wall is <b>one cell thick</b>, so substances only travel a short way. Oxygen and glucose diffuse out to the cells; carbon dioxide diffuses into the blood.',
+      cam: { t: [0, 0, 0], dir: [0.06, 0.34, 1], w: 7.8, h: 4.6 }, labels: ['cWall', 'cO2', 'cCO2'], focus: ['cap'],
+      legend: [['#FF4A3D', 'oxygen'], ['#F5B21E', 'glucose'], ['#7D86A6', 'carbon dioxide']],
+    },
+    {
+      title: 'Quick check',
+      text: 'Tap the blood vessel that has <b>valves</b>.',
+      cam: { t: [-1.0, 0.2, 0], dir: [0, 0.12, 1], w: 35, h: 8 }, labels: [], focus: [],
+      check: { answer: 'vein', pick: [hA, hC, hV],
+        yes: 'Yes: the <b>vein</b>. Its blood is at low pressure, so valves stop it flowing backwards.',
+        no: 'Only <b>veins</b> have valves: their blood is at low pressure and could flow backwards.' },
+      labelsAfter: ['vein'],
+    },
+  ];
+  return ch;
+}
+
+// ============================================================== chapter 4: inside the heart
+function chHeart() {
+  const ch = { id: 'heart', name: 'Heart', group: new THREE.Group(), glow: new Glow(), legend: 'blood', labels: {} };
+  const G = ch.group, S0 = 0.1;
+  const H = heartModel(); H.group.scale.setScalar(S0); H.group.position.set(0, 0, -5 * S0); G.add(H.group);
+  Object.assign(ch.labels, H.labels);
+  ch.glow.add('ra', H.mats.floorR); ch.glow.add('rv', H.mats.floorR); ch.glow.add('la', H.mats.floorL); ch.glow.add('lv', H.mats.floorL);
+  ch.glow.add('valves', H.mats.valve); ch.glow.add('muscle', H.mats.side, H.mats.cut);
+  ch.glow.add('sideR', H.mats.volR, H.mats.vesR); ch.glow.add('sideL', H.mats.volL, H.mats.vesL);
+
+  // ---- blood inside the heart, moving only when the valves allow it
+  const st = { p: 0.55, T: 3.2, slow: true };
+  const segs = [HP.vc, HP.ra, HP.rv, HP.pa, HP.pv, HP.la, HP.lv, HP.ao].map((pts, i) => ({
+    paths: [new Path(pts.map(hl), { density: 1.2 })], i,
+    rn: [2.2, 6.0, 5.4, 2.0, 2.2, 6.0, 5.4, 2.0][i], rb: [2.2, 3.0, 3.1, 2.0, 2.2, 3.0, 3.1, 2.0][i],
+    kind: ['in', 'atrium', 'ventricle', 'out', 'in', 'atrium', 'ventricle', 'out'][i],
+  }));
+  const N = 260;
+  const flow = new Flow({
+    parent: H.group, count: N, geometry: rbcGeometry(), material: new THREE.MeshPhysicalMaterial({ roughness: 0.36, clearcoat: 0.75, sheen: 0.3 }), size: 1.6, seed: 12, segs,
+    init: (c, R) => { const left = c.i >= N / 2; const r = R(); const s = r < 0.18 ? 0 : r < 0.45 ? 1 : r < 0.8 ? 2 : 3; c.seg = s + (left ? 4 : 0); c.t = s === 1 || s === 2 ? R() * c.slot : R(); },
+    next: c => { c.seg = c.seg === 3 ? 0 : c.seg === 7 ? 4 : c.seg + 1; c.br = 0; },
+    speed: (c, s) => {
+      const b = H.state.b, T = st.T, L = s.paths[0].len;
+      if (s.kind === 'in') return L / (0.9 * T);
+      if (s.kind === 'atrium') { if (b.avOpen) return b.phase === 0 ? L / (0.11 * T) : L / (0.48 * T); return c.t < c.slot ? L / (0.6 * T) : 0; }
+      if (s.kind === 'ventricle') { if (b.slOpen) return L / (0.2 * T); return c.t < c.slot ? L / (0.42 * T) : 0; }
+      return b.phase === 1 ? L / (0.42 * T) : L / (1.5 * T);
+    },
+    color: (c, s, out) => out.set(s.i < 4 ? C.deoxy : C.oxy),
+    scale: (c, s) => (s.kind === 'in' ? sstep(0, 0.18, c.t) : s.kind === 'out' ? 1 - sstep(0.8, 1, c.t) : 1),
+    pos: (c, s, P) => { if (s.kind === 'atrium' || s.kind === 'ventricle') squeezePoint(P, H.beat.uA.value, H.beat.uV.value); },
+  });
+
+  // ---- 'lub' and 'dub'
+  const lub = label('lub', { tone: 'pop nodot', dx: 0, dy: 0, fixed: true }); lub.position.copy(hl([40, 50, 14])); H.group.add(lub);
+  const dub = label('dub', { tone: 'pop nodot', dx: 0, dy: 0, fixed: true }); dub.position.copy(hl([40, 31, 14])); H.group.add(dub);
+  const sound = { lub: 0, dub: 0, on: false, ui: null };
+  H.state.onLub = () => { sound.lub = 0.5; };
+  H.state.onDub = () => { sound.dub = 0.5; };
+
+  // ---- a see-through person, to sort out left and right
+  const ghostMat = glass('#7F93C4', { opacity: 0.7, power: 1.3, base: 0.3 });
+  const person = new THREE.Group(); person.visible = false; G.add(person);
+  const part = (geo, x, y, z, rx = 0, rz = 0) => { const m = new THREE.Mesh(geo, ghostMat); m.position.set(x, y, z); m.rotation.set(rx, 0, rz); person.add(m); return m; };
+  part(new THREE.SphereGeometry(2.0, 32, 24), 0, 9.6, 0); part(new THREE.CylinderGeometry(0.8, 0.95, 1.4, 20), 0, 7.4, 0);
+  part(new THREE.CapsuleGeometry(3.7, 6.2, 10, 28), 0, 1.6, 0).scale.set(1.12, 1, 0.62);
+  for (const s of [1, -1]) {
+    part(new THREE.CapsuleGeometry(0.95, 5.4, 8, 16), s * 5.2, 2.6, 0, 0, s * 0.18);
+    part(new THREE.CapsuleGeometry(0.8, 4.8, 8, 16), s * 6.15, -3.3, 0.5, -0.12, s * 0.06);
+    part(new THREE.SphereGeometry(0.95, 16, 12), s * 6.35, -6.4, 0.7);
+  }
+  // a face, so it is obvious which way the person is facing
+  const faceMat = new THREE.MeshStandardMaterial({ color: '#2B3555', roughness: 0.6 });
+  const face = new THREE.Group(); person.add(face);
+  for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), faceMat); e.position.set(s * 0.62, 9.95, 1.86); face.add(e); }
+  const smile = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.07, 8, 24, Math.PI), faceMat); smile.position.set(0, 9.05, 1.82); smile.rotation.z = Math.PI; face.add(smile);
+  // hair on the back of the head: what you see when you walk round behind
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(2.08, 32, 16, Math.PI, Math.PI, 0, Math.PI * 0.62), new THREE.MeshStandardMaterial({ color: '#3B2C2A', roughness: 0.8 }));
+  hair.position.set(0, 9.6, 0); person.add(hair);
+  const Lp = (key, text, pos, o) => { const l = label(text, o); l.position.copy(pos); person.add(l); ch.labels[key] = l; };
+  Lp('theirR', 'their RIGHT hand', V3(-6.35, -6.4, 0.7), { tone: 'deoxy', dx: -10, dy: 46 });
+  Lp('theirL', 'their LEFT hand', V3(6.35, -6.4, 0.7), { tone: 'oxy', dx: 10, dy: 46 });
+  // small side labels that stay readable when the heart is shrunk into the chest
+  for (const [k, txt, X, dx, tone] of [['pR', 'right side of the heart', 17, -140, 'deoxy'], ['pL', 'left side of the heart', 63, 140, 'oxy']]) {
+    const l = label(txt, { tone, dx, dy: -6 }); l.position.copy(hl([X, 55, 10])); H.group.add(l); ch.labels[k] = l;
+  }
+  const pose = { inBody: 0 };
+  function setInBody(k) {
+    pose.inBody = k;
+    const s = lerp(S0, 0.03, k);
+    H.group.scale.setScalar(s); H.group.position.set(lerp(0, 0.9, k), lerp(0, 3.2, k), lerp(-5 * S0, 0.6, k));
+    ghostMat.uniforms.uOpacity.value = 0.7 * k; person.visible = k > 0.01;
+  }
+  function setBackSeeThrough(on) { H.mats.back.opacity = on ? 0.42 : 1; H.mats.back.depthWrite = !on; H.mats.back.needsUpdate = true; }
+
+  ch.update = (dt, time) => {
+    if (person.visible) {
+      const front = camera.position.z > 0; face.visible = front; hair.visible = !front;
+      // the side labels follow their side of the heart, so from behind they swap over too
+      ch.labels.pR.userData.dx = front ? -140 : 140; ch.labels.pL.userData.dx = front ? 140 : -140;
+    }
+    st.p = (st.p + dt / st.T) % 1;
+    H.update(dt, st.p);
+    flow.update(dt, time);
+    sound.lub = Math.max(0, sound.lub - dt); sound.dub = Math.max(0, sound.dub - dt);
+    lub.visible = sound.on && sound.lub > 0; dub.visible = sound.on && sound.dub > 0;
+    lub.userData.el.classList.toggle('on', lub.visible); dub.userData.el.classList.toggle('on', dub.visible);
+    if (sound.ui) sound.ui(st.p, H.state.b.phase, sound.lub > 0, sound.dub > 0);
+  };
+  const setSpeed = slow => { st.slow = slow; st.T = slow ? 3.2 : 0.85; };
+  ch.exit = () => { setSpeed(true); sound.on = false; setInBody(0); setBackSeeThrough(false); };
+
+  const front = { t: [0, 0.2, 0.3], dir: [0.1, 0.06, 1], w: 13.5, h: 9.6 };
+  ch.steps = [
+    {
+      title: 'Four chambers',
+      text: 'This heart has been cut open and faces you. The two <b>atria</b> on top collect blood. The two <b>ventricles</b> below squeeze it out.',
+      cam: front, labels: ['ra', 'la', 'rv', 'lv'], focus: ['ra', 'la'],
+    },
+    {
+      title: 'Blood in, blood out',
+      text: '<b>Veins</b> bring blood into the atria: the vena cava from the body, the pulmonary vein from the lungs. <b>Arteries</b> carry it out of the ventricles: the pulmonary artery to the lungs, the aorta to the body.',
+      cam: { t: [0, 0.8, 0.3], dir: [0.1, 0.08, 1], w: 15.5, h: 10 }, labels: ['vc', 'pa', 'pv', 'ao'], focus: [],
+    },
+    {
+      title: 'Two pumps, side by side',
+      text: 'The <span class="t-deoxy">right side</span> pumps oxygen-poor blood to the lungs. The <span class="t-oxy">left side</span> pumps oxygen-rich blood to the body. The <b>septum</b> keeps the two apart, so they never mix.',
+      cam: front, labels: ['sideR', 'sideL', 'septum'], focus: ['sideR', 'sideL'],
+    },
+    {
+      title: 'One heartbeat, in slow motion',
+      text: 'Follow the bar. <b>1</b> The atria squeeze blood down into the ventricles. <b>2</b> The ventricles squeeze it out into the arteries. <b>3</b> The heart relaxes and fills again. Valves snapping shut make the “lub-dub” sound.',
+      cam: front, labels: ['avR', 'slL'], focus: ['valves'],
+      enter: () => { sound.on = true; },
+      exit: () => { sound.on = false; },
+      ctl: el => {
+        el.innerHTML = `<div class="phases" id="ph"><div><b>1</b>Atria squeeze<i></i></div><div><b>2</b>Ventricles squeeze<i></i></div><div><b>3</b>Heart relaxes and fills<i></i></div></div>`
+          + `<div class="row" style="justify-content:space-between"><div class="sound"><span id="sLub">lub</span><span id="sDub">dub</span></div>`
+          + `<div class="seg"><button aria-pressed="true" data-s="1">Slow motion</button><button aria-pressed="false" data-s="0">Real speed</button></div></div>`;
+        const cells = el.querySelectorAll('#ph div'), fills = el.querySelectorAll('#ph div i'), SPAN = [[0, 0.14], [0.14, 0.48], [0.48, 1]];
+        el.querySelectorAll('.seg button').forEach(b => (b.onclick = () => { setSpeed(b.dataset.s === '1'); el.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b)); }));
+        sound.ui = (p, phase, l, d) => {
+          cells.forEach((c, i) => c.classList.toggle('on', i === phase));
+          fills.forEach((f, i) => { f.style.width = i === phase ? `${(100 * (p - SPAN[i][0]) / (SPAN[i][1] - SPAN[i][0])).toFixed(1)}%` : '0'; });
+          el.querySelector('#sLub').classList.toggle('on', l); el.querySelector('#sDub').classList.toggle('on', d);
+        };
+        return () => { sound.ui = null; setSpeed(true); };
+      },
+    },
+    {
+      title: 'Why the left ventricle has the thickest wall',
+      text: 'The <span class="t-oxy">left ventricle</span> must push blood all the way round the body, so it has the thickest, strongest wall. The <span class="t-deoxy">right ventricle</span> only pumps blood to the lungs, next door.',
+      cam: { t: [0, -1.4, 0.3], dir: [0.06, 0.2, 1], w: 12.5, h: 7.4 }, labels: ['thin', 'thick'], focus: ['muscle'],
+    },
+    {
+      title: 'Their right is on your left',
+      text: 'Diagrams show the heart as if the person is <b>facing you</b>. So their right side is on your left. Walk round behind them and the sides line up with yours.',
+      cam: { t: [0, 2.2, 0], dir: [0.08, 0.06, 1], w: 16, h: 19 }, labels: ['theirR', 'theirL', 'pR', 'pL'], focus: [],
+      enter: () => tween(1.2, k => setInBody(k)),
+      exit: () => { setInBody(0); setBackSeeThrough(false); },
+      ctl: el => {
+        el.innerHTML = '<div class="seg"><button aria-pressed="true" data-v="front">Facing you</button><button aria-pressed="false" data-v="back">Walk round behind</button></div>';
+        el.querySelectorAll('button').forEach(b => (b.onclick = () => {
+          const behind = b.dataset.v === 'back';
+          el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+          setBackSeeThrough(behind);
+          flyTo({ t: [0, 2.2, 0], dir: behind ? [-0.08, 0.06, -1] : [0.08, 0.06, 1], w: 16, h: 19 }, 1.6);
+        }));
+        return () => setBackSeeThrough(false);
+      },
+    },
+    {
+      title: 'Quick check',
+      text: 'Tap the chamber that pumps blood <b>to the whole body</b>.',
+      cam: front, labels: [], focus: [],
+      check: { answer: 'lv', pick: Object.values(H.hulls),
+        yes: 'Yes: the <b>left ventricle</b>. It has the thickest wall because it pumps blood all round the body.',
+        no: 'Blood is pumped to the body by the <b>left ventricle</b>: the bottom chamber on your right in the picture.' },
+      labelsAfter: ['lv'],
+    },
+  ];
+  return ch;
+}
+
+// ============================================================== chapter 5: plants
+function chPlants() {
+  const ch = { id: 'plants', name: 'Plants', group: new THREE.Group(), glow: new Glow(), legend: 'plant', labels: {} };
+  const G = ch.group;
+  const stP = new THREE.Group(), stL = new THREE.Group(), stK = new THREE.Group(); G.add(stP, stL, stK);
+  const Lb = (parent, key, text, pos, o) => { const l = label(text, o); l.position.copy(pos); parent.add(l); ch.labels[key] = l; return l; };
+  const R = rng(31);
+  const tA = V3(), tT = V3(), tN = V3(), tB = V3();
+
+  // ===================================================== the whole plant
+  // ---- soil block, cut open at the front
+  const soilSide = new THREE.MeshStandardMaterial({ color: '#7A5B3E', roughness: 1, side: THREE.DoubleSide });
+  const soilTop = new THREE.MeshStandardMaterial({ color: '#6E5038', roughness: 1, transparent: true, opacity: 0.55, depthWrite: false });
+  const soilFront = glass('#B08B63', { opacity: 0.32, base: 0.3, power: 1.2 });
+  const soil = new THREE.Mesh(new THREE.BoxGeometry(9.4, 4.4, 5.4), [soilSide, soilSide, soilTop, soilSide, soilFront, soilSide]);
+  soil.position.set(0, -2.2, 0); soil.renderOrder = 1; stP.add(soil);
+  ch.glow.add('soil', soilFront);
+
+  // ---- roots
+  const mainRoot = new Path([[0, -0.02, 0], [0.08, -1.0, 0.05], [0.05, -2.0, 0.12], [0.12, -3.0, 0.2], [0.2, -3.95, 0.25]], { density: 10 });
+  const roots = [{ path: mainRoot, r: 0.11, main: true, t0: 0 }];
+  for (const [t0, end] of [[0.16, [-3.4, -1.6, 0.6]], [0.3, [3.5, -2.0, -0.5]], [0.47, [-3.1, -3.2, -0.6]], [0.62, [3.2, -3.6, 0.7]], [0.78, [-1.7, -4.05, 0.9]]]) {
+    const a = mainRoot.at(t0, V3()), e = V3(...end), m = a.clone().lerp(e, 0.45).add(V3(0, 0.3, 0));
+    roots.push({ path: new Path([a, m, e], { density: 12 }), r: 0.065, main: false, t0 });
+  }
+  const rootMat = tissue(C.root, { roughness: 0.55, transparent: true, opacity: 1 });
+  for (const r of roots) stP.add(new THREE.Mesh(new THREE.TubeGeometry(r.path.curve, 48, r.r, 10), rootMat));
+  // root hair cells: long thin outgrowths near each tip
+  const hairGeo = new THREE.CylinderGeometry(0.011, 0.011, 1, 5); hairGeo.translate(0, 0.5, 0);
+  const HPR = 40, hairs = new THREE.InstancedMesh(hairGeo, tissue('#F7EBD2', { roughness: 0.6 }), roots.length * HPR); hairs.frustumCulled = false;
+  { let i = 0; const up = V3(0, 1, 0), q = new THREE.Quaternion(), m = new THREE.Matrix4();
+    for (const r of roots) for (let k = 0; k < HPR; k++) {
+      const t = 0.55 + 0.42 * R(); r.path.at(t, tA); r.path.frame(t, tT, tN, tB);
+      const a = R() * TAU, d = tN.clone().multiplyScalar(Math.cos(a)).addScaledVector(tB, Math.sin(a)).normalize();
+      q.setFromUnitVectors(up, d); m.compose(tA.clone().addScaledVector(d, r.r * 0.8), q, V3(0.9, 0.16 + R() * 0.14, 0.9)); hairs.setMatrixAt(i++, m);
+    } }
+  stP.add(hairs);
+  ch.glow.add('hairs', hairs.material); ch.glow.add('roots', rootMat);
+  const FH = (() => {
+    const r = roots[4], t = 0.78; r.path.at(t, tA); r.path.frame(t, tT, tN, tB);
+    const a = Math.atan2(tB.z, tN.z), d = tN.clone().multiplyScalar(Math.cos(a)).addScaledVector(tB, Math.sin(a)).normalize();
+    const base = tA.clone().addScaledVector(d, r.r * 0.8), tip = base.clone().addScaledVector(d, 0.75);
+    const m = new THREE.Mesh(new THREE.CapsuleGeometry(0.04, 0.72, 6, 12), tissue('#FFFFFF', { roughness: 0.4, emissive: col('#FFF6DD'), emissiveIntensity: 0.35 }));
+    m.position.copy(base).addScaledVector(d, 0.375); m.quaternion.setFromUnitVectors(V3(0, 1, 0), d); stP.add(m);
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTexture('rgba(120,200,255,0.75)'), transparent: true, depthWrite: false }));
+    halo.position.copy(base).addScaledVector(d, 0.4); halo.scale.setScalar(1.3); halo.visible = false; stP.add(halo);
+    return { base, tip, d, core: tA.clone(), halo };
+  })();
+  const NDROP = 6, drops = new THREE.InstancedMesh(new THREE.SphereGeometry(0.07, 12, 10), new THREE.MeshPhysicalMaterial({ color: C.water, roughness: 0.2, clearcoat: 1, emissive: col('#4AA8FF'), emissiveIntensity: 0.3 }), NDROP);
+  drops.frustumCulled = false; stP.add(drops); drops.visible = false;
+  const dropT = Array.from({ length: NDROP }, (_, i) => i / NDROP);
+  function updateDrops(dt) {
+    for (let i = 0; i < NDROP; i++) {
+      dropT[i] = (dropT[i] + dt * 0.35) % 1; const t = dropT[i];
+      // from the soil, onto the hair tip, down the hair, into the middle of the root
+      if (t < 0.3) tA.copy(FH.tip).addScaledVector(FH.d, 0.35 * (1 - t / 0.3)); else if (t < 0.8) tA.lerpVectors(FH.tip, FH.base, (t - 0.3) / 0.5); else tA.lerpVectors(FH.base, FH.core, (t - 0.8) / 0.2);
+      const sc = t < 0.08 ? t / 0.08 : t > 0.95 ? (1 - t) / 0.05 : 1;
+      _m.compose(tA, _q.identity(), _s.set(sc, sc, sc)); drops.setMatrixAt(i, _m);
+    }
+    drops.instanceMatrix.needsUpdate = true;
+  }
+  // soil crumbs (kept clear of the roots so the roots stay visible)
+  const rootPts = []; for (const r of roots) for (let i = 0; i <= 30; i++) rootPts.push(r.path.at(i / 30, V3()));
+  const crumbs = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshStandardMaterial({ roughness: 1 }), 150); crumbs.frustumCulled = false;
+  { const tones = ['#6F5135', '#93704C', '#5E432C', '#A9845B'].map(col); const m = new THREE.Matrix4(); let i = 0, guard = 0;
+    while (i < 150 && guard++ < 5000) {
+      const p = V3(-4.5 + R() * 9, -4.3 + R() * 4.2, -2.6 + R() * 3.4);
+      if (rootPts.some(q => q.distanceToSquared(p) < 0.55)) continue;
+      const s = 0.035 + R() * 0.07; m.compose(p, new THREE.Quaternion().setFromEuler(new THREE.Euler(R() * 3, R() * 3, 0)), V3(s, s * 0.8, s)); crumbs.setMatrixAt(i, m); crumbs.setColorAt(i, tones[i % 4]); i++;
+    }
+    crumbs.count = i; }
+  stP.add(crumbs);
+
+  // ---- stem, with its transport tissues inside
+  const stemPath = new Path([[0, -0.05, 0], [0.1, 1.6, 0.04], [0.02, 3.4, -0.02], [-0.06, 5.2, 0.02], [0.04, 7.3, 0]], { density: 8 });
+  const stemMat = tissue(C.stem, { roughness: 0.42, clearcoat: 0.6, transparent: true, opacity: 1 });
+  stP.add(new THREE.Mesh(new THREE.TubeGeometry(stemPath.curve, 80, 0.2, 18), stemMat));
+  const xyMat = glass(C.xylem, { opacity: 0, base: 0.55, power: 1.2 }), phMat = glass(C.phloem, { opacity: 0, base: 0.55, power: 1.2 });
+  const bundleDirs = [45, 135, 225, 315].map(d => V3(Math.cos(THREE.MathUtils.degToRad(d)), 0, Math.sin(THREE.MathUtils.degToRad(d))));
+  const offsetPath = (path, off, from = 0, to = 1) => { const pts = []; for (let i = 0; i <= 40; i++) pts.push(path.at(lerp(from, to, i / 40), V3()).add(off)); return new THREE.CatmullRomCurve3(pts); };
+  for (const d of bundleDirs) {
+    stP.add(new THREE.Mesh(new THREE.TubeGeometry(offsetPath(stemPath, d.clone().multiplyScalar(0.075)), 60, 0.032, 8), xyMat));
+    stP.add(new THREE.Mesh(new THREE.TubeGeometry(offsetPath(stemPath, d.clone().multiplyScalar(0.145)), 60, 0.026, 8), phMat));
+  }
+  for (const r of roots) {   // in roots the xylem runs down the middle, with phloem alongside
+    stP.add(new THREE.Mesh(new THREE.TubeGeometry(r.path.curve, 40, r.r * 0.32, 6), xyMat));
+    stP.add(new THREE.Mesh(new THREE.TubeGeometry(offsetPath(r.path, V3(0, 0, r.r * 0.55)), 40, r.r * 0.22, 6), phMat));
+  }
+  ch.glow.add('xylem', xyMat); ch.glow.add('phloem', phMat); ch.glow.add('stem', stemMat);
+
+  // ---- leaves
+  const leafMat = tissue(C.leaf, { roughness: 0.48, clearcoat: 0.45, side: THREE.DoubleSide, transparent: true, opacity: 1, sheen: 0.7, sheenColor: col('#BFF5E4') });
+  const leaves = [];
+  const leafGeometry = (Lg, W) => {
+    const nu = 26, nv = 10, pos = [], idx = [];
+    for (let i = 0; i <= nu; i++) for (let j = 0; j <= nv; j++) {
+      const u = i / nu, v = (j / nv) * 2 - 1, w = W * Math.pow(Math.sin(Math.PI * Math.pow(u, 0.8)), 0.9);
+      pos.push(0.18 + u * (Lg - 0.18), -0.16 * Lg * u * u + 0.07 * W * v * v, v * w);
+    }
+    for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { const a = i * (nv + 1) + j, b = a + nv + 1; idx.push(a, b, a + 1, b, b + 1, a + 1); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals(); return g;
+  };
+  for (const [h, phi, Lg] of [[2.1, 0.08, 2.7], [3.45, Math.PI - 0.08, 2.5], [4.65, 0.42, 2.15], [5.8, Math.PI + 0.42, 1.8]]) {
+    const tS = (h + 0.05) / 7.35, base = stemPath.at(tS, V3());
+    const side = Math.cos(phi) > 0 ? 1 : -1;
+    const g = new THREE.Group(); g.position.copy(base); g.rotation.set(side * 1.0, -phi, 0.3, 'YZX'); stP.add(g);
+    const W = Lg * 0.24;
+    const m = new THREE.Mesh(leafGeometry(Lg, W), leafMat); g.add(m);
+    const ribPts = []; for (let i = 0; i <= 16; i++) { const u = i / 16; ribPts.push(V3(0.05 + u * (Lg * 0.92 - 0.05), -0.16 * Lg * u * u + 0.012, 0)); }
+    const rib = new THREE.CatmullRomCurve3(ribPts);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(rib, 24, 0.026, 6), xyMat));
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ribPts.map(p => p.clone().add(V3(0, -0.03, 0.035)))), 24, 0.02, 6), phMat));
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(rib, 24, 0.035, 6), tissue('#7FD3B8', { roughness: 0.5 })));
+    g.updateMatrixWorld(true);
+    leaves.push({ g, Lg, W, tS, h, side, roll: side * 1.0, mesh: m });
+  }
+  ch.glow.add('leaf0', leafMat);
+  // a point on a leaf, in stage coordinates: u along the leaf, v across (-1..1), dy above(+)/below(-) the blade
+  const leafPoint = (lf, u, v, dy = 0) => {
+    const w = lf.W * Math.pow(Math.sin(Math.PI * Math.pow(u, 0.8)), 0.9);
+    const p = V3(0.18 + u * (lf.Lg - 0.18), -0.16 * lf.Lg * u * u + 0.07 * lf.W * v * v + dy, v * w * 0.92);
+    return lf.g.localToWorld(p);
+  };
+  const leafDown = lf => V3(0, -1, 0).applyQuaternion(lf.g.quaternion);
+  // ---- flower
+  const top = stemPath.at(1, V3());
+  const flower = new THREE.Group(); flower.position.copy(top).add(V3(0, 0.12, 0)); stP.add(flower);
+  const petalMat = tissue('#FFC23A', { roughness: 0.45, sheen: 0.8 });
+  for (let i = 0; i < 7; i++) { const p = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), petalMat); p.scale.set(0.46, 0.07, 0.2); p.position.set(Math.cos((i / 7) * TAU) * 0.4, 0, Math.sin((i / 7) * TAU) * 0.4); p.rotation.set(0, -(i / 7) * TAU, 0.25); flower.add(p); }
+  const centre = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 14), tissue('#B5651D')); centre.position.y = 0.04; flower.add(centre);
+  flower.rotation.x = 0.35; flower.scale.setScalar(1.6);
+  ch.glow.add('flower', petalMat);
+
+  // ---- x-ray: fade the outsides, show xylem and phloem
+  const xr = { k: 0, target: 0, pk: 0, ptarget: 0 };
+  const setXray = (on, phloem = false) => { xr.target = on ? 1 : 0; xr.ptarget = on && phloem ? 1 : 0; };
+  function updateXray(dt) {
+    const e = 1 - Math.exp(-dt * 4);
+    xr.k += (xr.target - xr.k) * e; xr.pk += (xr.ptarget - xr.pk) * e;
+    const k = xr.k;
+    stemMat.opacity = 1 - 0.78 * k; leafMat.opacity = 1 - 0.62 * k; rootMat.opacity = 1 - 0.7 * k;
+    for (const m of [stemMat, leafMat, rootMat]) { const dw = m.opacity > 0.98; if (m.depthWrite !== dw) { m.depthWrite = dw; m.needsUpdate = true; } }
+    xyMat.uniforms.uOpacity.value = 0.95 * k; phMat.uniforms.uOpacity.value = 0.95 * xr.pk;
+  }
+
+  // ---- water: soil -> root hair -> root xylem -> stem xylem -> leaf -> out of the stomata as vapour
+  const env = { light: true, warm: false, wind: false, humid: false, rate: 1.2, k: 1 };
+  const rateOf = e => 1.2 * (e.light ? 1 : 0.15) * (e.warm ? 5 / 3 : 1) * (e.wind ? 1.8 : 1) * (e.humid ? 4 / 9 : 1);
+  const SPD = { soil: 0.2, root: 0.75, stem: 1.35, leaf: 0.5 };
+  const NW = 230;
+  const waterMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshPhysicalMaterial({ roughness: 0.2, clearcoat: 1, emissive: col('#4AA8FF'), emissiveIntensity: 0.25 }), NW);
+  waterMesh.frustumCulled = false; stP.add(waterMesh);
+  const cWater = col(C.water), cVap = col('#E4F3FF');
+  function waterRoute() {
+    const root = roots[Math.floor(R() * roots.length)], th = 0.58 + R() * 0.38;
+    const pts = [], sp = [];
+    root.path.at(th, tA); root.path.frame(th, tT, tN, tB);
+    const a = R() * TAU, d = tN.clone().multiplyScalar(Math.cos(a)).addScaledVector(tB, Math.sin(a)).normalize();
+    pts.push(tA.clone().addScaledVector(d, root.r + 0.5)); sp.push('soil');
+    pts.push(tA.clone().addScaledVector(d, root.r * 0.4)); sp.push('root');
+    for (let t = th - 0.06; t > 0; t -= 0.06) { pts.push(root.path.at(t, V3())); sp.push('root'); }
+    if (!root.main) for (let t = root.t0; t > 0; t -= 0.06) { pts.push(mainRoot.at(t, V3())); sp.push('root'); }
+    pts.push(mainRoot.at(0, V3())); sp.push('stem');
+    const lf = leaves[Math.floor(R() * leaves.length)], bd = bundleDirs[Math.floor(R() * 4)].clone().multiplyScalar(0.075);
+    for (let t = 0.02; t < lf.tS; t += 0.04) { pts.push(stemPath.at(t, V3()).add(bd)); sp.push('stem'); }
+    pts.push(stemPath.at(lf.tS, V3())); sp.push('leaf');
+    const u = 0.25 + R() * 0.65;
+    for (let uu = 0.05; uu < u; uu += 0.12) { pts.push(leafPoint(lf, uu, 0, 0.01)); sp.push('leaf'); }
+    pts.push(leafPoint(lf, u, (R() * 2 - 1) * 0.75, -0.05)); sp.push('leaf');
+    const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + pts[i].distanceTo(pts[i - 1]));
+    return { pts, sp, cum, lf };
+  }
+  const water = [];
+  for (let i = 0; i < NW; i++) { const w = { route: waterRoute(), d: 0, i, vap: -1, vel: V3(), p: V3() }; w.d = R() * w.route.cum[w.route.cum.length - 1]; water.push(w); }
+  const wind = V3();
+  const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = V3(), _c = new THREE.Color();
+  const flowOn = { water: false, sugar: false, vapourOnly: false };
+  function updateWater(dt) {
+    const k = clamp(env.rate / 1.2, 0.12, 3.2);
+    for (const w of water) {
+      const r = w.route, n = r.pts.length;
+      if (w.vap >= 0) {
+        w.vap += dt / (env.humid ? 3.2 : 2.2);
+        w.vel.addScaledVector(wind, dt * 1.2); w.p.addScaledVector(w.vel, dt);
+        const f = w.vap;
+        _c.lerpColors(cWater, cVap, Math.min(1, f * 2.5));
+        const s = 0.06 * (1 + f * 1.2) * (1 - sstep(0.45, 1, f));
+        _m.compose(w.p, _q.identity(), _s.set(s, s, s)); waterMesh.setMatrixAt(w.i, _m); waterMesh.setColorAt(w.i, _c);
+        if (f >= 1) { w.route = waterRoute(); w.d = 0; w.vap = -1; }
+        continue;
+      }
+      let seg = 0; while (seg < n - 2 && r.cum[seg + 1] < w.d) seg++;
+      w.d += SPD[r.sp[seg]] * k * dt * (r.sp[seg] === 'soil' ? 1 : 1);
+      const tot = r.cum[n - 1];
+      if (w.d >= tot) {
+        // leaves the leaf through a stoma: open stomata only in the light
+        if (!env.light && R() > 0.15) { w.route = waterRoute(); w.d = 0; continue; }
+        w.vap = 0; w.p.copy(r.pts[n - 1]); w.vel.copy(leafDown(r.lf)).multiplyScalar(0.12).add(V3((R() - 0.5) * 0.25, -0.16 - R() * 0.1, 0.12 + R() * 0.1));
+        continue;
+      }
+      seg = 0; while (seg < n - 2 && r.cum[seg + 1] < w.d) seg++;
+      const f = (w.d - r.cum[seg]) / Math.max(1e-5, r.cum[seg + 1] - r.cum[seg]);
+      w.p.lerpVectors(r.pts[seg], r.pts[seg + 1], f);
+      const vis = flowOn.vapourOnly ? 0 : 1;
+      const s = 0.072 * vis * (seg === 0 ? sstep(0, 0.4, f) : 1);
+      _m.compose(w.p, _q.identity(), _s.set(s, s, s)); waterMesh.setMatrixAt(w.i, _m); waterMesh.setColorAt(w.i, cWater);
+    }
+    waterMesh.instanceMatrix.needsUpdate = true; waterMesh.instanceColor.needsUpdate = true;
+  }
+  for (let i = 0; i < NW; i++) waterMesh.setColorAt(i, cWater);
+
+  // ---- sugar: made in the leaves, carried both ways in the phloem
+  const NS = 90;
+  const sugarMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: '#FFFFFF', emissive: col('#FFF3D6'), emissiveIntensity: 0.4, roughness: 0.35 }), NS);
+  const sugarRim = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: '#C97800', side: THREE.BackSide }), NS);
+  sugarMesh.frustumCulled = sugarRim.frustumCulled = false; stP.add(sugarRim, sugarMesh);
+  // chevrons beside the stem: sugar goes up above the leaves and down below them
+  const chevGeo = new THREE.ConeGeometry(0.13, 0.3, 16);
+  const chevMat = tissue('#E08A00', { roughness: 0.4, clearcoat: 0.6 });
+  const chevrons = new THREE.Group(); stP.add(chevrons); chevrons.visible = false;
+  for (const [t, up] of [[0.84, 1], [0.92, 1], [0.12, -1], [0.04, -1]]) {
+    const m = new THREE.Mesh(chevGeo, chevMat); m.position.copy(stemPath.at(t, V3())).add(V3(-0.42, 0, 0.1)); if (up < 0) m.rotation.z = Math.PI; chevrons.add(m);
+  }
+  const showChevrons = on => { chevrons.visible = on; };
+  function sugarRoute() {
+    const lf = leaves[Math.floor(R() * leaves.length)], pts = [], bd = bundleDirs[Math.floor(R() * 4)].clone().multiplyScalar(0.145);
+    const u = 0.3 + R() * 0.6;
+    for (let uu = u; uu > 0.04; uu -= 0.1) pts.push(leafPoint(lf, uu, 0, -0.02).add(V3(0, 0, 0.02)));
+    pts.push(stemPath.at(lf.tS, V3()).add(bd));
+    const up = R() < 0.4;
+    if (up) { for (let t = lf.tS; t <= 1; t += 0.04) pts.push(stemPath.at(Math.min(1, t), V3()).add(bd)); pts.push(top.clone().add(V3(0, 0.1, 0))); }
+    else {
+      for (let t = lf.tS; t > 0; t -= 0.04) pts.push(stemPath.at(t, V3()).add(bd));
+      const root = roots[Math.floor(R() * roots.length)];
+      if (!root.main) for (let t = 0; t < root.t0; t += 0.06) pts.push(mainRoot.at(t, V3()).add(V3(0, 0, root.r * 0.55)));
+      for (let t = 0; t <= 0.95; t += 0.06) pts.push(root.path.at(t, V3()).add(V3(0, 0, root.r * 0.55)));
+    }
+    const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + pts[i].distanceTo(pts[i - 1]));
+    return { pts, cum, up };
+  }
+  const sugar = []; for (let i = 0; i < NS; i++) { const s = { route: sugarRoute(), d: 0, i, a: R() * TAU }; s.d = R() * s.route.cum[s.route.cum.length - 1]; sugar.push(s); }
+  function updateSugar(dt) {
+    for (const s of sugar) {
+      const r = s.route, n = r.pts.length; s.d += 0.55 * dt; s.a += dt * 2;
+      if (s.d >= r.cum[n - 1]) { s.route = sugarRoute(); s.d = 0; continue; }
+      let seg = 0; while (seg < n - 2 && r.cum[seg + 1] < s.d) seg++;
+      const f = (s.d - r.cum[seg]) / Math.max(1e-5, r.cum[seg + 1] - r.cum[seg]);
+      tA.lerpVectors(r.pts[seg], r.pts[seg + 1], f);
+      const sc = 0.1 * (1 - sstep(0.92, 1, s.d / r.cum[n - 1]));
+      _q.setFromEuler(new THREE.Euler(s.a, s.a * 0.7, 0)); _m.compose(tA, _q, _s.set(sc, sc, sc)); sugarMesh.setMatrixAt(s.i, _m);
+      _m.compose(tA, _q, _s.set(sc * 1.3, sc * 1.3, sc * 1.3)); sugarRim.setMatrixAt(s.i, _m);
+    }
+    sugarMesh.instanceMatrix.needsUpdate = true; sugarRim.instanceMatrix.needsUpdate = true;
+  }
+
+  // ---- the weather for the experiment
+  const sun = new THREE.Mesh(new THREE.SphereGeometry(0.75, 32, 16), new THREE.MeshBasicMaterial({ color: '#FFD45A' }));
+  sun.position.set(3.7, 7.3, -2.2); stP.add(sun);
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTexture('rgba(255,214,90,0.85)'), transparent: true, depthWrite: false }));
+  halo.scale.setScalar(3.4); halo.position.copy(sun.position); stP.add(halo);
+  const mistTex = softTexture('rgba(235,242,255,0.55)');
+  const mist = []; for (let i = 0; i < 26; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: mistTex, transparent: true, opacity: 0, depthWrite: false })); sp.position.set(-4.5 + R() * 9, 1.2 + R() * 6.6, -1.8 + R() * 3.6); sp.scale.setScalar(2.2 + R() * 2.4); sp.userData.v = 0.1 + R() * 0.2; stP.add(sp); mist.push(sp); }
+  const streakGeo = new THREE.PlaneGeometry(1.6, 0.025);
+  const streaks = []; for (let i = 0; i < 16; i++) { const m = new THREE.Mesh(streakGeo, new THREE.MeshBasicMaterial({ color: '#FFFFFF', transparent: true, opacity: 0, depthWrite: false })); m.position.set(-6 + R() * 12, 1 + R() * 6.8, -1.5 + R() * 3); m.userData.v = 4 + R() * 3; stP.add(m); streaks.push(m); }
+  const look = { sun: 0, mist: 0, wind: 0 };
+  function updateWeather(dt, time, experiment) {
+    const tk = 1 - Math.exp(-dt * 3);
+    look.sun += ((experiment ? (env.light ? 1 : 0.08) : 0) - look.sun) * tk;
+    look.mist += ((experiment && env.humid ? 1 : 0) - look.mist) * tk;
+    look.wind += ((experiment && env.wind ? 1 : 0) - look.wind) * tk;
+    sun.visible = halo.visible = look.sun > 0.12; sun.scale.setScalar(0.4 + 0.6 * look.sun); halo.material.opacity = look.sun;
+    if (experiment) scene.environmentIntensity = 0.25 + 0.45 * look.sun;
+    keyLight.intensity = 2.1 * (experiment ? 0.25 + 0.75 * look.sun + (env.light ? 0 : 0.05) : 1);
+    hemi.intensity = 0.85 * (experiment ? 0.45 + 0.55 * look.sun : 1);
+    for (const m of mist) { m.material.opacity = look.mist * 0.75; m.position.x += m.userData.v * dt * (1 + look.wind * 4); if (m.position.x > 5) m.position.x -= 10; }
+    for (const s of streaks) { s.material.opacity = look.wind * 0.55; s.position.x += s.userData.v * dt; if (s.position.x > 6) s.position.x = -6; }
+    wind.set(look.wind * 1.7, 0, 0);
+    const sway = look.wind * 0.09;
+    leaves.forEach((lf, i) => { lf.g.rotation.x = lf.roll + Math.sin(time * 3.1 + i) * sway; });
+  }
+
+  // ---- labels on the whole plant
+  Lb(stP, 'oOrganism', 'the whole plant', V3(3.7, 2.3, 0), { tone: 'nodot', dx: 80, dy: 0, sub: 'an organism' });
+  Lb(stP, 'oShoot', 'shoot system', V3(-3.7, 4.5, 0), { tone: 'nodot', dx: -80, dy: 0, sub: 'stem, leaves and flowers' });
+  Lb(stP, 'oRoot', 'root system', V3(-3.7, -2.2, 0), { tone: 'nodot', dx: -76, dy: 0, sub: 'all the roots' });
+  Lb(stP, 'oLeaf', 'leaf', leafPoint(leaves[0], 0.62, 0.2, 0.03), { tone: 'plant', dx: 70, dy: -50, sub: 'an organ' });
+  Lb(stP, 'oStem', 'stem', stemPath.at(0.36, V3()).add(V3(-0.2, 0, 0)), { tone: 'plant', dx: -86, dy: 0, sub: 'an organ' });
+  Lb(stP, 'oFlower', 'flower', top.clone().add(V3(-0.4, 0.15, 0)), { tone: 'plant', dx: -76, dy: -26, sub: 'an organ' });
+  Lb(stP, 'oRootOrg', 'root', roots[2].path.at(0.6, V3()), { tone: 'plant', dx: 70, dy: 34, sub: 'an organ' });
+  Lb(stP, 'pHair', 'root hair cell', FH.tip, { tone: 'water', dx: 90, dy: -60, sub: 'long and thin: a big surface area' });
+  Lb(stP, 'pOsm', 'water moves in by osmosis', FH.base.clone().lerp(FH.tip, 0.5), { tone: 'water', dx: 110, dy: 50 });
+  Lb(stP, 'pXylem', 'xylem', stemPath.at(0.42, V3()).add(V3(0.07, 0, 0.06)), { tone: 'water', dx: 160, dy: -10, sub: 'water and mineral ions, upwards only' });
+  Lb(stP, 'pPhloem', 'phloem', stemPath.at(0.5, V3()).add(V3(-0.13, 0, 0.1)), { tone: 'sugar', dx: -92, dy: -12, sub: 'sugars, up and down' });
+  Lb(stP, 'pUp', 'sugar to the flower', top.clone().add(V3(0.2, -0.4, 0)), { tone: 'sugar', dx: 84, dy: 4 });
+  Lb(stP, 'pDown', 'sugar to the roots', mainRoot.at(0.45, V3()).add(V3(0.1, 0, 0.2)), { tone: 'sugar', dx: 86, dy: 20 });
+  Lb(stP, 'pVap', 'water vapour leaves through stomata', leafPoint(leaves[1], 0.55, 0, -0.35), { tone: 'water', dx: -60, dy: 56 });
+  const bracketMat = new THREE.MeshBasicMaterial({ color: '#47526F' });
+  const bracket = (x, y0, y1, s) => {
+    const pts = [V3(x + 0.35 * s, y0, 0), V3(x, y0, 0), V3(x, y1, 0), V3(x + 0.35 * s, y1, 0)];
+    const path = new THREE.CurvePath(); for (let i = 0; i < 3; i++) path.add(new THREE.LineCurve3(pts[i], pts[i + 1]));
+    const g = new THREE.Group(); g.add(new THREE.Mesh(new THREE.TubeGeometry(path, 60, 0.04, 6), bracketMat)); stP.add(g); g.visible = false; return g;
+  };
+  const brOrganism = bracket(3.7, -4.3, 8.9, -1), brShoot = bracket(-3.7, 0.15, 8.9, 1), brRoot = bracket(-3.7, -4.3, -0.15, 1);
+  const setBrackets = lv => { brOrganism.visible = lv === 'organism'; brShoot.visible = brRoot.visible = lv === 'system'; };
+  // pick hulls for the quick check
+  const hRoot = hull(new THREE.BoxGeometry(9.2, 4.3, 5.2), 'roots', stP, V3(0, -2.2, 0));
+  const hStem = hull(new THREE.CylinderGeometry(0.45, 0.45, 7.2, 10), 'stem', stP, V3(0, 3.6, 0));
+  const hFlower = hull(new THREE.SphereGeometry(0.9, 12, 8), 'flower', stP, flower.position);
+  const hLeaves = leaves.map(lf => { const h = hull(new THREE.BoxGeometry(lf.Lg, 0.6, lf.W * 2.2), 'leaves', lf.g, V3(lf.Lg / 2, -0.15 * lf.Lg * 0.3, 0)); h.visible = false; return h; });
+  hRoot.visible = hStem.visible = hFlower.visible = false;
+
+  // ===================================================== inside a leaf (tissue level)
+  const Rl = rng(44), m4 = new THREE.Matrix4();
+  const epiMat = tissue('#DDF1EA', { roughness: 0.35, clearcoat: 0.8, transparent: true, opacity: 0.88 });
+  const epi = new THREE.InstancedMesh(new RoundedBoxGeometry(0.98, 0.3, 0.98, 2, 0.1), epiMat, 2 * 10 * 6); epi.frustumCulled = false;
+  { let i = 0; for (const y of [1.42, -1.42]) for (let a = 0; a < 10; a++) for (let b = 0; b < 6; b++) { m4.makeTranslation(-4.5 + a, y, -2.5 + b); epi.setMatrixAt(i++, m4); } }
+  stL.add(epi);
+  const palMat = tissue('#5CC27A', { roughness: 0.45, transparent: true, opacity: 0.72, depthWrite: false });
+  const palPos = []; for (let a = 0; a < 14; a++) for (let b = 0; b < 8; b++) palPos.push(V3(-4.55 + a * 0.7, 0.62, -2.62 + b * 0.75));
+  const pal = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.29, 0.86, 6, 14), palMat, palPos.length); pal.frustumCulled = false;
+  palPos.forEach((p, i) => { m4.makeTranslation(p.x, p.y, p.z); pal.setMatrixAt(i, m4); });
+  pal.renderOrder = 2; stL.add(pal);
+  const chlGeo = new THREE.SphereGeometry(1, 10, 8);
+  const chlMat = tissue('#1C8F3B', { roughness: 0.4 });
+  const chl = new THREE.InstancedMesh(chlGeo, chlMat, palPos.length * 9 + 90 * 4); chl.frustumCulled = false;
+  let nChl = 0;
+  palPos.forEach(p => { for (let k = 0; k < 9; k++) { const a = Rl() * TAU, y = (Rl() - 0.5) * 1.0; m4.compose(V3(p.x + Math.cos(a) * 0.22, p.y + y, p.z + Math.sin(a) * 0.22), new THREE.Quaternion().setFromEuler(new THREE.Euler(Rl(), Rl(), Rl())), V3(0.075, 0.045, 0.05)); chl.setMatrixAt(nChl++, m4); } });
+  const spongyMat = tissue('#9ED8A8', { roughness: 0.5, transparent: true, opacity: 0.8, depthWrite: false });
+  const spPos = []; while (spPos.length < 90) { const p = V3(-4.6 + Rl() * 9.2, -0.95 + Rl() * 0.85, -2.7 + Rl() * 5.4); if (Math.hypot(p.x - 0.6, p.y + 0.5) < 0.75) continue; if (spPos.every(q => q.distanceTo(p) > 0.62)) spPos.push(p); }
+  const spongy = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 16, 12), spongyMat, spPos.length); spongy.frustumCulled = false;
+  spPos.forEach((p, i) => { m4.compose(p, new THREE.Quaternion().setFromEuler(new THREE.Euler(Rl(), Rl(), Rl())), V3(0.26 + Rl() * 0.05, 0.2, 0.24)); spongy.setMatrixAt(i, m4); for (let k = 0; k < 4; k++) { m4.compose(p.clone().add(V3((Rl() - 0.5) * 0.4, (Rl() - 0.5) * 0.3, (Rl() - 0.5) * 0.4)), new THREE.Quaternion(), V3(0.06, 0.04, 0.05)); chl.setMatrixAt(nChl++, m4); } });
+  chl.count = nChl; spongy.renderOrder = 2; stL.add(spongy, chl);
+  // a vein running through the leaf: xylem above phloem, inside a bundle sheath
+  const sheath = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 6.2, 32, 1, true), glass('#CDEFD9', { opacity: 0.6, base: 0.25 })); sheath.rotation.x = Math.PI / 2; sheath.position.set(0.6, -0.5, 0); stL.add(sheath);
+  const lxMat = tissue(C.xylem, { roughness: 0.3, clearcoat: 0.8 }), lpMat = tissue(C.phloem, { roughness: 0.35, clearcoat: 0.6 });
+  const lx = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 6.2, 28), lxMat); lx.rotation.x = Math.PI / 2; lx.position.set(0.6, -0.3, 0); stL.add(lx);
+  const lp = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 6.2, 24), lpMat); lp.rotation.x = Math.PI / 2; lp.position.set(0.6, -0.78, 0); stL.add(lp);
+  ch.glow.add('pal', palMat); ch.glow.add('lx', lxMat); ch.glow.add('lp', lpMat);
+  // a stoma in the lower surface, cut through at the front: two guard cells with the pore between them
+  const guardMat = tissue('#3BAA62', { roughness: 0.4, clearcoat: 0.6 });
+  const guards = [];
+  for (const s of [-1, 1]) { const g = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.9, 6, 16), guardMat); g.rotation.x = Math.PI / 2; g.position.set(-1.8 + s * 0.3, -1.44, 2.55); stL.add(g); guards.push({ g, s }); }
+  ch.glow.add('guard', guardMat);
+  // vapour leaving through the pore, water arriving from the xylem
+  const NV = 46, vap = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshPhysicalMaterial({ roughness: 0.2, clearcoat: 1, emissive: col('#4AA8FF'), emissiveIntensity: 0.3 }), NV);
+  vap.frustumCulled = false; stL.add(vap);
+  const vp = Array.from({ length: NV }, (_, i) => ({ i, t: Rl(), d: 2.4 + Rl() * 1.6, a: V3(), b: V3(), c: V3(), e: V3(), water: i < 18 }));
+  const pore = V3(-1.8, -1.44, 2.55);
+  const respawnV = v => {
+    if (v.water) { v.a.set(0.6, -0.3, -2.6 + Rl() * 5.2); const p = spPos[Math.floor(Rl() * spPos.length)]; v.b.copy(p); v.c.copy(p); v.e.copy(p); }
+    else { const p = spPos[Math.floor(Rl() * spPos.length)]; v.a.copy(p).add(V3(0, -0.2, 0)); v.b.set(-1.8 + (Rl() - 0.5) * 0.6, -1.0, 2.0 + Rl() * 0.5); v.c.copy(pore); v.e.copy(pore).add(V3((Rl() - 0.5) * 1.6, -1.6 - Rl() * 0.8, 0.4 + Rl() * 0.8)); }
+    v.t = 0;
+  };
+  vp.forEach(v => { respawnV(v); v.t = Rl(); });
+  const stomaState = { open: 1 };
+  function updateLeafSection(dt) {
+    stomaState.open += ((env.light ? 1 : 0) - stomaState.open) * (1 - Math.exp(-dt * 2));
+    for (const g of guards) g.g.position.x = -1.8 + g.s * (0.24 + 0.1 * stomaState.open);
+    for (const v of vp) {
+      v.t += dt / v.d; if (v.t >= 1) respawnV(v);
+      const t = v.t; let s = 0.06;
+      if (v.water) { tA.lerpVectors(v.a, v.b, easeIO(t)); _c.set(C.water); }
+      else {
+        if (t < 0.4) tA.lerpVectors(v.a, v.b, easeIO(t / 0.4)); else if (t < 0.6) tA.lerpVectors(v.b, v.c, (t - 0.4) / 0.2); else tA.lerpVectors(v.c, v.e, easeOut((t - 0.6) / 0.4));
+        if (t > 0.45 && stomaState.open < 0.35) { s = 0; }
+        _c.lerpColors(cWater, cVap, sstep(0.55, 0.8, t)); s *= 1 - sstep(0.85, 1, t);
+      }
+      _m.compose(tA, _q.identity(), _s.set(s, s, s)); vap.setMatrixAt(v.i, _m); vap.setColorAt(v.i, _c);
+    }
+    vap.instanceMatrix.needsUpdate = true; vap.instanceColor.needsUpdate = true;
+  }
+  for (let i = 0; i < NV; i++) vap.setColorAt(i, cWater);
+  Lb(stL, 'lEpi', 'epidermis', V3(-3.5, 1.57, 2.5), { tone: 'plant', dx: -60, dy: -40, sub: 'a protective outer layer' });
+  Lb(stL, 'lPal', 'palisade cells', V3(-3.4, 0.7, 2.62), { tone: 'plant', dx: -96, dy: -6, sub: 'most photosynthesis happens here' });
+  Lb(stL, 'lSp', 'spongy cells and air spaces', V3(3.4, -0.6, 2.6), { tone: 'plant', dx: 92, dy: 26 });
+  Lb(stL, 'lXy', 'xylem', V3(0.6, -0.3, 3.1), { tone: 'water', dx: 110, dy: -40, sub: 'brings water into the leaf' });
+  Lb(stL, 'lPh', 'phloem', V3(0.6, -0.78, 3.1), { tone: 'sugar', dx: 90, dy: 20, sub: 'takes sugar away' });
+  Lb(stL, 'lGuard', 'guard cells', V3(-2.1, -1.44, 3.0), { tone: 'plant', dx: -90, dy: 30, sub: 'open and close the stoma' });
+  Lb(stL, 'lStoma', 'stoma', V3(-1.8, -1.62, 3.0), { tone: 'water', dx: 50, dy: 54, sub: 'water vapour diffuses out' });
+  Lb(stL, 'lAir', 'water evaporates into the air spaces', V3(-1.2, -0.65, 2.6), { tone: 'water', dx: -70, dy: -110 });
+
+  // ===================================================== one palisade cell (cell level)
+  const kWall = new THREE.Mesh(new THREE.CapsuleGeometry(1.45, 3.3, 10, 40), glass('#62C484', { opacity: 0.55, base: 0.12, power: 1.6 })); stK.add(kWall);
+  const kMem = new THREE.Mesh(new THREE.CapsuleGeometry(1.33, 3.15, 10, 40), glass('#A9E2B9', { opacity: 0.35, base: 0.05, power: 2.2 })); stK.add(kMem);
+  const kVac = new THREE.Mesh(new THREE.CapsuleGeometry(0.88, 2.4, 10, 32), new THREE.MeshPhysicalMaterial({ color: '#BFE4FF', roughness: 0.1, transparent: true, opacity: 0.45, clearcoat: 1, depthWrite: false })); kVac.position.x = 0.12; stK.add(kVac);
+  const kNuc = new THREE.Mesh(new THREE.SphereGeometry(0.48, 32, 24), tissue(C.nucleus, { roughness: 0.4 })); kNuc.position.set(-0.85, 0.9, 0.55); stK.add(kNuc);
+  const NK = 30, kChl = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 16, 12), tissue('#22A045', { roughness: 0.35, clearcoat: 0.6 }), NK); kChl.frustumCulled = false; stK.add(kChl);
+  const kc = Array.from({ length: NK }, (_, i) => ({ a: (i / NK) * TAU * 3, y: -2.0 + (i / NK) * 4.0, r: 1.15 }));
+  ch.glow.add('kChl', kChl.material);
+  function updateCell(dt) {
+    kc.forEach((c, i) => { c.a += dt * 0.18; c.y += dt * 0.12; if (c.y > 2.1) c.y = -2.1;
+      m4.compose(V3(Math.cos(c.a) * c.r, c.y, Math.sin(c.a) * c.r), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -c.a, 0.3)), V3(0.3, 0.17, 0.2)); kChl.setMatrixAt(i, m4); });
+    kChl.instanceMatrix.needsUpdate = true;
+  }
+  Lb(stK, 'kWall', 'cell wall', V3(1.45, 1.3, 0), { tone: 'plant', dx: 84, dy: -30, sub: 'strong, made of cellulose' });
+  Lb(stK, 'kChl', 'chloroplasts', V3(-1.15, -0.8, 0.3), { tone: 'plant', dx: -96, dy: 20, sub: 'where photosynthesis happens' });
+  Lb(stK, 'kNuc', 'nucleus', kNuc.position, { tone: 'warn', dx: -80, dy: -40 });
+  Lb(stK, 'kVac', 'vacuole', V3(0.4, -0.6, 0.6), { tone: 'water', dx: 86, dy: 40, sub: 'full of cell sap' });
+
+  // ===================================================== xylem and phloem, cut open side by side
+  const stX = new THREE.Group(); G.add(stX); stX.visible = false;
+  const HX = 7.2, XR = 0.95, XX = -1.75, PR = 0.62, PX = 1.55;
+  // xylem: one long hollow tube of dead cells, no end walls, rings of lignin
+  const xyWall = new THREE.Mesh(new THREE.CylinderGeometry(XR, XR, HX, 48, 1, true, Math.PI / 2, Math.PI),
+    new THREE.MeshPhysicalMaterial({ color: '#D9ECFF', roughness: 0.35, clearcoat: 0.6, side: THREE.DoubleSide }));
+  xyWall.position.x = XX; stX.add(xyWall);
+  const ligMat = tissue('#0B6F60', { roughness: 0.4, clearcoat: 0.5 });
+  for (let y = -HX / 2 + 0.3; y < HX / 2; y += 0.42) {
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(XR - 0.04, 0.075, 8, 40, Math.PI), ligMat);
+    ring.rotation.x = -Math.PI / 2;   // the back half, matching the cut wall
+    ring.position.set(XX, y, 0); stX.add(ring);
+  }
+  // faint seams where the dead cells meet: the end walls have gone
+  for (const y of [-1.2, 1.2]) {
+    const seam = new THREE.Mesh(new THREE.TorusGeometry(XR + 0.01, 0.02, 6, 40, Math.PI), new THREE.MeshBasicMaterial({ color: '#7C8DB0' }));
+    seam.rotation.x = -Math.PI / 2; seam.position.set(XX, y, 0); stX.add(seam);
+  }
+  // phloem: living sieve tube cells joined by sieve plates, each with a companion cell
+  const sieveMat = new THREE.MeshPhysicalMaterial({ color: '#FFE7B8', roughness: 0.45, clearcoat: 0.4, side: THREE.DoubleSide });
+  const plateMat = tissue('#E08A00', { roughness: 0.45, side: THREE.DoubleSide });
+  const holeMat = new THREE.MeshBasicMaterial({ color: '#5C3A00' });
+  const compMat = tissue('#FFD27A', { roughness: 0.5, side: THREE.DoubleSide });
+  const CELL = HX / 3;
+  for (let k = 0; k < 3; k++) {
+    const yc = -HX / 2 + CELL * (k + 0.5);
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(PR, PR, CELL - 0.06, 40, 1, true, Math.PI / 2, Math.PI), sieveMat);
+    tube.position.set(PX, yc, 0); stX.add(tube);
+    // a few strands of living cytoplasm along the wall
+    for (const th of [0.9, 1.6, 2.3]) {
+      const d = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), compMat);
+      d.position.set(PX - Math.cos(th) * (PR - 0.08), yc + (th - 1.6) * 0.6, -Math.sin(th) * (PR - 0.08)); stX.add(d);
+    }
+    // companion cell alongside
+    const comp = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, CELL * 0.8, 20, 1, true, Math.PI / 2, Math.PI), compMat);
+    comp.position.set(PX + PR + 0.3, yc, -0.05); stX.add(comp);
+    const nuc = new THREE.Mesh(new THREE.SphereGeometry(0.15, 14, 10), tissue(C.nucleus)); nuc.position.set(PX + PR + 0.3, yc + 0.15, -0.1); stX.add(nuc);
+    if (k > 0) {   // sieve plate: a wall full of holes between two cells
+      const yp = -HX / 2 + CELL * k;
+      const plate = new THREE.Mesh(new THREE.CylinderGeometry(PR, PR, 0.07, 40, 1, false, Math.PI / 2, Math.PI), plateMat); plate.position.set(PX, yp, 0); stX.add(plate);
+      for (const [hx, hz] of [[-0.3, -0.2], [0, -0.32], [0.3, -0.2], [-0.15, -0.5], [0.15, -0.5], [0, -0.08]]) {
+        const h = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 12), holeMat); h.position.set(PX + hx, yp, hz); stX.add(h);
+      }
+    }
+  }
+  // what moves: water up the xylem, sugar through the sieve plates
+  const NXW = 34, xw = new THREE.InstancedMesh(new THREE.SphereGeometry(0.075, 10, 8), new THREE.MeshPhysicalMaterial({ color: C.water, roughness: 0.2, clearcoat: 1, emissive: col('#4AA8FF'), emissiveIntensity: 0.3 }), NXW);
+  const NXS = 18, xs = new THREE.InstancedMesh(new THREE.BoxGeometry(0.13, 0.13, 0.13), new THREE.MeshStandardMaterial({ color: '#FFFFFF', emissive: col('#FFF3D6'), emissiveIntensity: 0.4 }), NXS);
+  const xsRim = new THREE.InstancedMesh(new THREE.BoxGeometry(0.17, 0.17, 0.17), new THREE.MeshBasicMaterial({ color: '#C97800', side: THREE.BackSide }), NXS);
+  xw.frustumCulled = xs.frustumCulled = xsRim.frustumCulled = false; stX.add(xw, xsRim, xs);
+  const Rx = rng(77);
+  const xwP = Array.from({ length: NXW }, () => ({ y: -HX / 2 + Rx() * HX, a: Rx() * Math.PI, r: Rx() * (XR - 0.25) }));
+  const xsP = Array.from({ length: NXS }, () => ({ y: -HX / 2 + Rx() * HX, a: Rx() * Math.PI, r: Rx() * (PR - 0.25), s: Rx() * 6 }));
+  function updateClose(dt, time) {
+    xwP.forEach((w, i) => { w.y += dt * 1.1; if (w.y > HX / 2) w.y -= HX; tA.set(XX + Math.cos(w.a) * w.r * 0.9, w.y, -0.15 - Math.sin(w.a) * w.r * 0.8);
+      _m.compose(tA, _q.identity(), _s.set(1, 1, 1)); xw.setMatrixAt(i, _m); });
+    xsP.forEach((p, i) => { p.y -= dt * 0.55; if (p.y < -HX / 2) p.y += HX; tA.set(PX + Math.cos(p.a) * p.r * 0.9, p.y, -0.12 - Math.sin(p.a) * p.r * 0.8); p.s += dt;
+      _q.setFromEuler(new THREE.Euler(p.s, p.s * 0.7, 0)); _m.compose(tA, _q, _s.set(1, 1, 1)); xs.setMatrixAt(i, _m); xsRim.setMatrixAt(i, _m); });
+    xw.instanceMatrix.needsUpdate = xs.instanceMatrix.needsUpdate = xsRim.instanceMatrix.needsUpdate = true;
+  }
+  Lb(stX, 'xName', 'XYLEM', V3(XX, HX / 2 + 0.2, 0), { tone: 'side nodot', dx: 0, dy: -16, sub: 'carries water, upwards only' });
+  Lb(stX, 'pName2', 'PHLOEM', V3(PX + 0.2, HX / 2 + 0.2, 0), { tone: 'side nodot', dx: 0, dy: -16, sub: 'carries sugar, up or down' });
+  Lb(stX, 'xDead', 'dead cells: a hollow tube', V3(XX - XR + 0.1, 0.6, -0.2), { tone: 'water', dx: -130, dy: -20 });
+  Lb(stX, 'xNoEnd', 'no end walls, so water flows straight through', V3(XX - 0.6, -1.2, -0.6), { tone: 'water', dx: -150, dy: 46 });
+  Lb(stX, 'xLig', 'rings of lignin: strong, keeps the tube open', V3(XX + XR - 0.06, 2.4, -0.05), { tone: 'plant', dx: -60, dy: -70 });
+  Lb(stX, 'pLive', 'living cells', V3(PX - PR + 0.1, -2.2, -0.2), { tone: 'sugar', dx: 120, dy: 70 });
+  Lb(stX, 'pPlate', 'sieve plate: holes let sugar pass', V3(PX + 0.2, -HX / 2 + CELL, -0.3), { tone: 'sugar', dx: 150, dy: 10 });
+  Lb(stX, 'pComp', 'companion cell', V3(PX + PR + 0.3, 1.4, 0), { tone: 'sugar', dx: 110, dy: -30 });
+
+  // ===================================================== chapter wiring
+  let stage = 'P';
+  const show = s => { stage = s; stP.visible = s === 'P'; stL.visible = s === 'L'; stK.visible = s === 'K'; stX.visible = s === 'X'; };
+  show('P');
+  const camWhole = { t: [0, 2.2, 0], dir: [0.16, 0.12, 1], w: 11.5, h: 14.4 };
+  const camSection = { t: [0, -0.1, 0.4], dir: [0.32, 0.26, 1], w: 11.5, h: 6.4 };
+  let experiment = false;
+  const setFlows = (w, s, vapOnly = false) => { flowOn.water = w; flowOn.sugar = s; flowOn.vapourOnly = vapOnly; waterMesh.visible = w; sugarMesh.visible = sugarRim.visible = s; };
+  setFlows(false, false);
+  ch.update = (dt, time) => {
+    if (stage === 'P') {
+      updateXray(dt); updateWeather(dt, time, experiment);
+      if (flowOn.water) updateWater(dt);
+      if (flowOn.sugar) updateSugar(dt);
+      if (drops.visible) updateDrops(dt);
+    } else if (stage === 'L') updateLeafSection(dt);
+    else if (stage === 'X') updateClose(dt, time);
+    else updateCell(dt);
+  };
+  const resetEnv = () => { Object.assign(env, { light: true, warm: false, wind: false, humid: false }); env.rate = rateOf(env); TINT.set('transparent', false); scene.environmentIntensity = 0.7; };
+  ch.exit = () => { experiment = false; resetEnv(); setXray(false); setFlows(false, false); keyLight.intensity = 2.1; hemi.intensity = 0.85; show('P'); updateWeather(1, 0, false); };
+
+  const LEVELS = [
+    { k: 'cell', name: 'Cell', ex: 'palisade cell', stage: 'K', cam: { t: [0, 0, 0], dir: [0.25, 0.15, 1], w: 7.5, h: 7 }, labels: ['kWall', 'kChl', 'kNuc', 'kVac'], focus: ['kChl'],
+      note: 'Everything is built from <b>cells</b>. Palisade cells are packed with chloroplasts for photosynthesis.' },
+    { k: 'tissue', name: 'Tissue', ex: 'palisade', stage: 'L', cam: camSection, labels: ['lPal', 'lXy', 'lPh', 'lEpi'], focus: ['pal'],
+      note: 'A <b>tissue</b> is a group of similar cells doing the same job, like this layer of palisade cells. Xylem and phloem are tissues too.' },
+    { k: 'organ', name: 'Organ', ex: 'a leaf', stage: 'P', cam: { t: [0.2, 4.4, 0], dir: [0.3, 0.2, 1], w: 7.5, h: 7.4 }, labels: ['oLeaf', 'oStem', 'oFlower'], focus: ['leaf0'],
+      note: 'An <b>organ</b> is made of several different tissues working together. Leaves, stems, roots and flowers are organs.' },
+    { k: 'system', name: 'Organ system', ex: 'shoot, root', stage: 'P', cam: camWhole, labels: ['oShoot', 'oRoot'], focus: ['stem', 'leaf0', 'flower', 'roots', 'hairs'],
+      note: 'Organs working together make an <b>organ system</b>. A plant has two: the shoot system and the root system.' },
+    { k: 'organism', name: 'Organism', ex: 'the plant', stage: 'P', cam: camWhole, labels: ['oOrganism'], focus: [],
+      note: 'The whole plant is an <b>organism</b>: a complete living thing.' },
+  ];
+  ch.steps = [
+    {
+      title: 'Plants are organised in levels',
+      text: 'Cells make tissues, tissues make organs, organs make organ systems, and organ systems make the whole plant. Tap a level to zoom.',
+      cam: camWhole, labels: ['oOrganism'], focus: [],
+      enter: () => { show('P'); setFlows(false, false); setXray(false); setBrackets('organism'); },
+      exit: () => setBrackets(''),
+      ctl: (el, api) => {
+        el.innerHTML = `<div class="ladder" role="group" aria-label="Levels of organisation">${LEVELS.map(l => `<button data-k="${l.k}" aria-pressed="false">${l.name}<small>${l.ex}</small></button>`).join('')}</div><p class="mini" id="lvNote"></p>`;
+        const pickLv = async (k, instant) => {
+          const L = LEVELS.find(l => l.k === k);
+          el.querySelectorAll('.ladder button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === k));
+          el.querySelector('#lvNote').innerHTML = L.note;
+          if (L.stage !== stage) { await api.flash(() => show(L.stage)); }
+          api.labels(L.labels); ch.glow.set(L.focus); setBrackets(k); flyTo(L.cam, instant ? 0 : 1.3, instant);
+        };
+        el.querySelectorAll('.ladder button').forEach(b => (b.onclick = () => pickLv(b.dataset.k)));
+        el.querySelector('#lvNote').innerHTML = LEVELS[4].note;
+        el.querySelector('.ladder button[data-k="organism"]').setAttribute('aria-pressed', 'true');
+        return () => show('P');
+      },
+    },
+    {
+      title: 'Water in, through the root hairs',
+      text: '<b>Root hair cells</b> take in <span class="t-water">water</span> from the soil by <b>osmosis</b>. They take in mineral ions too, by a different process. Each long, thin hair gives a big surface area.',
+      cam: { t: [FH.tip.x - 0.3, FH.tip.y + 0.2, FH.tip.z], dir: [0.1, 0.16, 1], w: 4.2, h: 2.9 }, labels: ['pHair', 'pOsm'], focus: [],
+      enter: () => { show('P'); setFlows(true, false); setXray(true); drops.visible = FH.halo.visible = true; },
+      exit: () => { drops.visible = FH.halo.visible = false; },
+    },
+    {
+      title: 'Up the stem, in the xylem',
+      text: '<span class="t-water">Xylem</span> vessels are hollow tubes of dead cells with no end walls, strengthened with lignin. They carry water and mineral ions <b>upwards only</b>.',
+      cam: { t: [0, 2.3, 0], dir: [0.22, 0.1, 1], w: 4.6, h: 5.8 }, labels: ['pXylem'], focus: ['xylem'],
+      enter: () => { show('P'); setFlows(true, false); setXray(true); },
+    },
+    {
+      title: 'Xylem and phloem, up close',
+      text: 'Cut open, the two transport tissues look very different. <span class="t-water">Xylem</span> is a hollow tube of dead cells with no end walls, made strong by lignin. <span class="t-sugar">Phloem</span> is made of living cells joined end to end by sieve plates.',
+      cam: { t: [0.1, 0.2, 0], dir: [0.12, 0.08, 1], w: 9.5, h: 9.2 }, labels: ['xName', 'pName2', 'xDead', 'xNoEnd', 'xLig', 'pLive', 'pPlate', 'pComp'], focus: [],
+      enter: () => api_flash(() => show('X')),
+    },
+    {
+      title: 'Out through the leaves: transpiration',
+      text: 'Inside the leaf, water <b>evaporates</b> into the air spaces. The vapour <b>diffuses</b> out through the <b>stomata</b>. This loss of water is <b>transpiration</b>, and it pulls more water up the xylem behind it.',
+      cam: { t: [-1.0, -0.75, 1.8], dir: [0.3, 0.1, 1], w: 7.2, h: 4.4 }, labels: ['lAir', 'lStoma', 'lGuard', 'lXy'], focus: ['guard'],
+      enter: () => api_flash(() => show('L')),
+    },
+    {
+      title: 'Phloem carries sugar both ways',
+      text: 'Leaves make sugar by photosynthesis. <span class="t-sugar">Phloem</span> carries it, dissolved, <b>up and down</b> the plant: to the flower, to growing tips and down to the roots.',
+      cam: { t: [0, 1.4, 0], dir: [0.18, 0.12, 1], w: 9, h: 12.6 }, labels: ['pPhloem', 'pUp', 'pDown'], focus: ['phloem'],
+      enter: () => { show('P'); setFlows(false, true); setXray(true, true); showChevrons(true); },
+      exit: () => showChevrons(false),
+    },
+    {
+      title: 'Experiment: what speeds up transpiration?',
+      text: 'Change the conditions and watch the water vapour and the meter. Change one thing at a time to make it a fair test.',
+      cam: { t: [0.2, 4.0, 0], dir: [0.14, 0.1, 1], w: 9.2, h: 8.2 }, labels: ['pVap'], focus: [],
+      enter: () => { show('P'); setXray(true); setFlows(true, false); experiment = true; },
+      exit: () => { experiment = false; resetEnv(); },
+      ctl: el => {
+        const icon = { light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>',
+          warm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14.5V4.8a2 2 0 1 1 4 0v9.7a4 4 0 1 1-4 0z"/><path d="M12 9v7"/></svg>',
+          wind: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8.5h11a3 3 0 1 0-3-3"/><path d="M3 12.5h15a3 3 0 1 1-3 3"/><path d="M3 16.5h7"/></svg>',
+          humid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3s6 6.4 6 10.6A6 6 0 0 1 6 13.6C6 9.4 12 3 12 3z"/></svg>' };
+        const names = { light: 'Light', warm: 'Warm', wind: 'Windy', humid: 'Humid' };
+        el.innerHTML = `<div class="toggles">${Object.keys(names).map(k => `<button class="tog" data-k="${k}" aria-pressed="${env[k]}">${icon[k]}${names[k]}</button>`).join('')}</div>`
+          + `<div class="meter"><b id="rate">1.2</b><span>grams of water lost per hour</span><div class="bar"><i id="rateBar"></i></div></div>`
+          + `<div class="stoma"><svg viewBox="0 0 46 34"><ellipse id="gL" cx="17" cy="17" rx="8" ry="14" fill="#2FA866"/><ellipse id="gR" cx="29" cy="17" rx="8" ry="14" fill="#2FA866"/><ellipse id="pore" cx="23" cy="17" rx="3.2" ry="10" fill="#1A2238"/></svg><span id="stTxt">In the light the stomata are open, so water vapour can escape.</span></div>`;
+        const upd = () => {
+          env.rate = rateOf(env);
+          el.querySelector('#rate').textContent = env.rate.toFixed(1);
+          el.querySelector('#rateBar').style.width = `${Math.min(100, (env.rate / 4) * 100).toFixed(0)}%`;
+          el.querySelectorAll('.tog').forEach(b => b.setAttribute('aria-pressed', env[b.dataset.k]));
+          const open = env.light;
+          el.querySelector('#pore').setAttribute('rx', open ? 3.2 : 0.4);
+          el.querySelector('#gL').setAttribute('cx', open ? 17 : 19); el.querySelector('#gR').setAttribute('cx', open ? 29 : 27);
+          el.querySelector('#stTxt').textContent = open ? 'In the light the stomata are open, so water vapour can escape.' : 'In the dark the stomata close, so very little water vapour escapes.';
+          const dark = 'rgba(10,16,40,.42)', hot = 'radial-gradient(90% 80% at 75% 20%, rgba(255,140,40,.34), rgba(255,120,40,0) 70%)';
+          TINT.set(!env.light ? (env.warm ? 'linear-gradient(rgba(10,16,40,.38),rgba(10,16,40,.38)), ' + hot : dark) : env.warm ? hot : 'transparent', env.warm || !env.light);
+        };
+        el.querySelectorAll('.tog').forEach(b => (b.onclick = () => { env[b.dataset.k] = !env[b.dataset.k]; upd(); }));
+        upd();
+        return () => resetEnv();
+      },
+    },
+    {
+      title: 'Quick check',
+      text: 'Tap the part of the plant where <b>water gets in</b>.',
+      cam: camWhole, labels: [], focus: [],
+      enter: () => { show('P'); setFlows(false, false); setXray(false); },
+      check: { answer: 'roots', pick: [hRoot, hStem, hFlower, ...hLeaves],
+        yes: 'Yes: the <b>roots</b>. Root hair cells take in water from the soil by osmosis.',
+        no: 'Water gets in through the <b>roots</b>: root hair cells take it in from the soil by osmosis.' },
+      labelsAfter: ['oRoot'],
+    },
+  ];
+  let api_flash = f => f();
+  ch.bindApi = api => { api_flash = api.flash; };
+  return ch;
+}
+
+// ============================================================== the story engine
+const ui = {
+  nav: $('#chapters'), kicker: $('#kicker'), dots: $('#dots'), title: $('#stepTitle'), text: $('#stepText'), ctl: $('#stepCtl'),
+  back: $('#back'), next: $('#next'), legend: $('#legend'), flash: $('#flash'), hint: $('#hint'), loading: $('#loading'), tint: $('#tint'),
+};
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem('ts3d') || '{}'); } catch (e) { return {}; } },
+  set(v) { try { localStorage.setItem('ts3d', JSON.stringify(v)); } catch (e) { /* storage may be blocked: the page works without it */ } },
+};
+const saved = store.get();
+const doneSet = new Set(saved.done || []);
+let chapters = [], cur = null, ci = -1, si = -1, cleanup = null, check = null, stepCount = 0;
+
+function flash(fn) {
+  return new Promise(res => {
+    ui.flash.classList.add('on');
+    setTimeout(() => { fn(); requestAnimationFrame(() => requestAnimationFrame(() => { ui.flash.classList.remove('on'); res(); })); }, REDUCED ? 60 : 300);
+  });
+}
+function showLabel(l, on) {
+  if (!l) return;
+  if (on) { l.visible = true; requestAnimationFrame(() => l.userData.el.classList.add('on')); }
+  else { l.userData.el.classList.remove('on'); l.visible = false; }
+}
+function setLabels(keys = []) { if (!cur) return; for (const [k, l] of Object.entries(cur.labels)) showLabel(l, keys.includes(k)); }
+const API = { flash, labels: setLabels };
+
+function renderNav() {
+  ui.nav.innerHTML = chapters.map((c, i) => `<button data-i="${i}" aria-current="${i === ci}" class="${doneSet.has(c.id) ? 'done' : ''}"><i>${doneSet.has(c.id) ? '✓' : i + 1}</i><span>${c.name}</span></button>`).join('');
+  ui.nav.querySelectorAll('button').forEach(b => (b.onclick = () => goChapter(+b.dataset.i)));
+  const curBtn = ui.nav.querySelector('[aria-current="true"]'); if (curBtn) curBtn.scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function renderLegend() {
+  const k = cur.legend, step = cur.steps[si];
+  if (step && step.legend) { ui.legend.innerHTML = step.legend.map(([c, t]) => `<div class="key"><i style="background:${c}"></i>${t}</div>`).join(''); blockCache = null; return; }
+  blockCache = null;
+  ui.legend.innerHTML = k === 'blood'
+    ? '<div class="key"><i style="background:var(--oxy)"></i>rich in oxygen</div><div class="key"><i style="background:var(--deoxy)"></i>low in oxygen</div><div class="key note">blue is only a diagram colour</div>'
+    : k === 'plant'
+      ? '<div class="key"><i style="background:var(--water)"></i>water</div><div class="key"><i style="background:var(--sugar)"></i>sugar</div>'
+      : '';
+}
+function renderDots() {
+  ui.dots.innerHTML = cur.steps.map((s, i) => `<button role="tab" aria-label="Step ${i + 1}: ${s.title}" aria-selected="${i === si}" class="${i === si ? 'on' : i < si ? 'seen' : ''}" data-i="${i}"></button>`).join('');
+  ui.dots.querySelectorAll('button').forEach(b => (b.onclick = () => goStep(+b.dataset.i)));
+}
+function nextLabel() {
+  const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+  if (si < cur.steps.length - 1) return 'Next' + arrow;
+  if (ci < chapters.length - 1) return `Next: ${chapters[ci + 1].name}` + arrow;
+  return 'Back to the start' + arrow;
+}
+function leaveStep() {
+  if (!cur || si < 0) return;
+  const s = cur.steps[si];
+  if (cleanup) { try { cleanup(); } catch (e) { console.error(e); } cleanup = null; }
+  try { s.exit?.(); } catch (e) { console.error(e); }
+  check = null; canvas.classList.remove('pickable');
+}
+function goStep(j, instant = false) {
+  j = clamp(j, 0, cur.steps.length - 1);
+  leaveStep();
+  si = j; const s = cur.steps[j];
+  if (stepCount++ > 0) ui.hint.classList.add('gone');
+  ui.kicker.textContent = `${cur.name} · step ${j + 1} of ${cur.steps.length}`;
+  ui.title.textContent = s.title; ui.text.innerHTML = s.text;
+  renderDots();
+  ui.back.disabled = ci === 0 && j === 0;
+  ui.next.innerHTML = nextLabel();
+  setLabels(s.labels || []); cur.glow.set(s.focus || []); renderLegend();
+  ui.ctl.innerHTML = '';
+  try { s.enter?.(); } catch (e) { console.error(e); }
+  if (s.ctl) { try { cleanup = s.ctl(ui.ctl, API) || null; } catch (e) { console.error(e); } }
+  if (s.check) startCheck(s);
+  layout();
+  if (!s.follow) flyTo(s.cam, 1.35, instant);
+  store.set({ ci, si, done: [...doneSet] });
+}
+async function goChapter(i, step = 0, instant = false) {
+  if (i === ci) { goStep(step, instant); return; }
+  const doSwitch = () => {
+    if (cur) {
+      leaveStep(); try { cur.exit?.(); } catch (e) { console.error(e); }
+      cur.group.visible = false; for (const l of Object.values(cur.labels)) showLabel(l, false);
+    }
+    ci = i; cur = chapters[i]; cur.group.visible = true; si = -1;
+    renderNav(); renderLegend();
+    try { cur.enter?.(); } catch (e) { console.error(e); }
+    goStep(step, true);
+  };
+  if (instant || !cur) doSwitch(); else await flash(doSwitch);
+}
+function next() { if (si < cur.steps.length - 1) goStep(si + 1); else goChapter((ci + 1) % chapters.length); }
+function back() { if (si > 0) goStep(si - 1); else if (ci > 0) goChapter(ci - 1, chapters[ci - 1].steps.length - 1); }
+ui.next.onclick = next; ui.back.onclick = back;
+$('#resetView').onclick = () => { const s = cur.steps[si]; if (s.follow) return; flyTo(CAM.home || s.cam, 1.0); };
+
+// ---- quick checks: tap the model
+function startCheck(s) {
+  check = { s, done: false };
+  ui.ctl.innerHTML = '<div class="tap"><i></i>Tap your answer on the model</div>';
+  canvas.classList.add('pickable');
+}
+function answer(key) {
+  const s = check.s, ok = key === s.check.answer;
+  ui.ctl.innerHTML = `<div class="check ${ok ? 'good' : 'bad'}"><span class="ck">${ok ? 'Correct' : 'Not quite'}</span>${ok ? s.check.yes : s.check.no}</div>`
+    + (ok ? '' : '<div class="row"><button class="btn small" id="retry">Try again</button></div>');
+  setLabels(s.labelsAfter || []);
+  if (ok) { check.done = true; canvas.classList.remove('pickable'); doneSet.add(cur.id); renderNav(); store.set({ ci, si, done: [...doneSet] }); }
+  else { check.done = true; canvas.classList.remove('pickable'); ui.ctl.querySelector('#retry').onclick = () => { setLabels([]); startCheck(s); layout(); }; }
+  layout();
+}
+
+// ---- tapping the model
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let down = null;
+canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; canvas.classList.add('grabbing'); ui.hint.classList.add('gone'); });
+window.addEventListener('pointerup', e => {
+  canvas.classList.remove('grabbing');
+  if (!down) return; const d = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t; down = null;
+  if (d > 7 || dt > 700 || e.target !== canvas) return;
+  const s = cur && cur.steps[si]; if (!s) return;
+  const objs = check && !check.done ? (s.check.pick || s.check.pickFn()) : s.pickAny ? s.pickAny() : null;
+  if (!objs) return;
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(objs, false)[0];
+  if (!hit) return;
+  const key = hit.object.userData.pick;
+  if (check && !check.done) answer(key); else if (cur.onPick) cur.onPick(key);
+});
+window.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input')) return;
+  if (e.key === 'ArrowRight') { next(); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft') { back(); e.preventDefault(); }
+  else if (/^[1-5]$/.test(e.key)) goChapter(+e.key - 1);
+});
+window.addEventListener('resize', () => { layout(); const s = cur && cur.steps[si]; if (s && !s.follow && !CAM.busy) flyTo(CAM.home || s.cam, 0, true); });
+new ResizeObserver(() => layout()).observe(cardEl);
+setTimeout(() => ui.hint.classList.add('gone'), 12000);
+
+// ---- boot
+const pad = (r, p = 6) => ({ x0: r.left - p, x1: r.right + p, y0: r.top - p, y1: r.bottom + p });
+let blockCache = null, blockAt = 0;
+function blockers() {   // screen areas labels must not cover (refreshed a few times a second)
+  const now = performance.now();
+  if (blockCache && now - blockAt < 250) return blockCache;
+  blockAt = now;
+  blockCache = [cardEl, ui.nav, $('#resetView'), ...ui.legend.children].filter(e => e && e.offsetParent !== null).map(e => pad(e.getBoundingClientRect()));
+  return blockCache;
+}
+window.addEventListener('resize', () => { for (const l of LABELS) l.userData.pw = 0; blockCache = null; });
+document.fonts?.ready.then(() => { for (const l of LABELS) l.userData.pw = 0; blockCache = null; });   // label sizes change when the web fonts arrive
+const clock = new THREE.Clock();
+let fpsT = 0, fpsN = 0; const quality = { ups: 0 };
+function frame() {
+  requestAnimationFrame(frame);
+  const real = Math.min(0.1, clock.getDelta());           // camera moves keep real time, even on a slow device
+  const dt = Math.min(0.05, real) * (REDUCED ? 0.6 : 1), t = clock.elapsedTime;
+  runTweens(real); TINT.update(real);
+  if (cur) { try { cur.update(dt, t); } catch (e) { console.error(e); } cur.glow.update(dt, t); }
+  controls.enabled = !CAM.follow;
+  controls.update();
+  renderer.render(scene, camera); labelRenderer.render(scene, camera);
+  layoutLabels(blockers());
+  fpsN++; fpsT += real;
+  if (fpsT > 1.5) {
+    const fps = fpsN / fpsT; window.__fps = Math.round(fps); fpsN = 0; fpsT = 0;
+    // keep it smooth on modest laptops: render fewer pixels when frames drop, more when there is headroom
+    const pr = renderer.getPixelRatio(), maxPr = Math.min(devicePixelRatio || 1, 2);
+    if (!document.hidden && fps < 38 && pr > 0.75) { renderer.setPixelRatio(Math.max(0.75, pr - 0.25)); layout(); }
+    else if (fps > 57 && pr < maxPr && quality.ups < 3) { renderer.setPixelRatio(Math.min(maxPr, pr + 0.25)); quality.ups++; layout(); }
+  }
+}
+function boot() {
+  chapters = [chLoop(), chBlood(), chVessels(), chHeart(), chPlants()];
+  for (const c of chapters) {
+    scene.add(c.group); c.group.visible = false;
+    c.showLabel = (k, on) => { if (c === cur) showLabel(c.labels[k], on); };
+    c.bindApi?.(API);
+  }
+  layout();
+  const fromHash = chapters.findIndex(c => '#' + c.id === location.hash);
+  const startCh = fromHash >= 0 ? fromHash : clamp(saved.ci ?? 0, 0, chapters.length - 1);
+  const startSt = fromHash >= 0 ? 0 : clamp(saved.si ?? 0, 0, chapters[startCh].steps.length - 1);
+  goChapter(startCh, startSt, true);
+  renderer.compile(scene, camera);
+  frame();
+  setTimeout(() => ui.loading.classList.add('gone'), 120);
+  setTimeout(() => { ui.loading.hidden = true; }, 900);   // gone for good, even if the fade could not run
+  window.__ready = true;
+}
+try { boot(); } catch (e) { console.error(e); document.getElementById('loadMsg').textContent = 'Something went wrong while building the 3D models: ' + e.message; }
+
+</script>
+</body>
+</html>

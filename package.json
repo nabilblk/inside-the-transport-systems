@@ -1,0 +1,13 @@
+{
+  "name": "inside-the-transport-systems",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An interactive 3D explorer of the Year 8 science unit Transport systems: blood, blood vessels, the heart and transport in plants. Built with three.js.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:dev": "node scripts/build.mjs --dev",
+    "preview": "npx --yes serve@14 public"
+  },
+  "license": "MIT"
+}

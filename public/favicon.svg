@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .tile { fill: #EDF0F7 } .deoxy { fill: #4643CC } .oxy { fill: #DD4239 } .gap { stroke: #EDF0F7 }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #141B35 } .deoxy { fill: #9592FF } .oxy { fill: #FF6D63 } .gap { stroke: #141B35 }
+    }
+  </style>
+  <defs>
+    <path id="h" d="M32 55C30 53.5 7 39 7 22.5 7 14 13 8.5 20.5 8.5c5 0 9.1 2.9 11.5 7.1 2.4-4.2 6.5-7.1 11.5-7.1C51 8.5 57 14 57 22.5 57 39 34 53.5 32 55Z"/>
+    <clipPath id="l"><rect width="32" height="64"/></clipPath>
+    <clipPath id="r"><rect x="32" width="32" height="64"/></clipPath>
+  </defs>
+  <rect class="tile" width="64" height="64" rx="14"/>
+  <!-- the heart's right side (on the viewer's left) carries deoxygenated blood, its left side oxygenated -->
+  <use href="#h" class="deoxy" clip-path="url(#l)"/>
+  <use href="#h" class="oxy" clip-path="url(#r)"/>
+  <path class="gap" d="M32 15.5V55" stroke-width="2.6"/>
+  <ellipse cx="45" cy="19" rx="4.2" ry="2.6" transform="rotate(-28 45 19)" fill="#fff" opacity=".35"/>
+</svg>
