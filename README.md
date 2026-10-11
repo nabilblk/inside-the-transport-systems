@@ -4,6 +4,8 @@ An interactive 3D explorer for the Year 8 (KS3) science unit **Transport systems
 
 Each step says in a sentence or two what to look at, and the model moves to show it. Every chapter ends with a quick check that you answer by tapping the model.
 
+**[Open the explorer → inside-the-transport-systems.vercel.app](https://inside-the-transport-systems.vercel.app)**
+
 ![The heart chapter: one heartbeat in slow motion, with the heart cut open and a phase bar under the explanation](docs/desktop-heart.jpg)
 
 <p align="center">
@@ -75,7 +77,7 @@ npm run preview    # serves public/ at http://localhost:3000
 
 ## Deploy
 
-On Vercel, import the repository and keep the default settings. `vercel.json` picks no framework, runs `npm run build` and serves `public/`. Every push to `main` deploys again.
+The live site runs on Vercel and deploys again on every push to `main`. To host your own copy, import the repository on Vercel and keep the default settings: `vercel.json` picks no framework, runs `npm run build` and serves `public/`.
 
 Any static host works as well: upload the `public/` folder.
 
